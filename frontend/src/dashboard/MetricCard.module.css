@@ -46,6 +46,16 @@
   line-height: 1.4;
 }
 
+.subTop {
+  margin-top: 8px;
+}
+
+.valueSuffix {
+  font-size: 15px;
+  font-family: var(--font-sans);
+  color: var(--color-text-secondary);
+}
+
 .progress {
   height: 4px;
   background: var(--color-bg-base);

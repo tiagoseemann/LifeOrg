@@ -16,7 +16,7 @@ export function TasksMetricCard({ done, total }: TasksMetricProps) {
       <span className={styles.label}>Tarefas hoje</span>
       <div className={styles.value}>
         {done}
-        <span style={{ fontSize: 15, fontFamily: 'var(--font-sans)', color: 'var(--color-text-secondary)' }}>
+        <span className={styles.valueSuffix}>
           {' '}/ {total}
         </span>
       </div>
@@ -53,7 +53,7 @@ export function NextBlockMetricCard({ block }: NextBlockMetricProps) {
     return (
       <div className={styles.card}>
         <span className={styles.label}>Próximo bloco</span>
-        <span className={styles.sub} style={{ marginTop: 8 }}>Nenhum bloco agendado para hoje</span>
+        <span className={`${styles.sub} ${styles.subTop}`}>Nenhum bloco agendado para hoje</span>
       </div>
     )
   }
