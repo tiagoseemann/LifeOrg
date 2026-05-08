@@ -89,13 +89,10 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
     )
 
-    # Unique index: only one active session at a time
-    op.create_index(
-        "uq_active_session",
-        "focus_sessions",
-        ["id"],
-        unique=True,
-        postgresql_where=sa.text("ended_at IS NULL"),
+    # Unique index: enforces only one active session at a time
+    # Uses constant expression (true) so at most one row can satisfy ended_at IS NULL
+    op.execute(
+        "CREATE UNIQUE INDEX uq_active_session ON focus_sessions ((true)) WHERE ended_at IS NULL"
     )
 
     # Seed default categories: Pessoal, Trabalho, Estudo (NOT Faculdade)
