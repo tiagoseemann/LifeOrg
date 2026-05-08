@@ -4,7 +4,7 @@ import { CalBlock } from './CalBlock'
 import { NewBlockModal } from './NewBlockModal'
 import { useBlocks, useCreateBlock, useDeleteBlock, useUpdateBlock } from '../hooks/useBlocks'
 import { useCategories } from '../hooks/useCategories'
-import { fmtDateRange, fmtTime } from '../lib/format'
+import { fmtDateRange, fmtTime, localDateStr } from '../lib/format'
 import type { Block } from '../types/calendar'
 import styles from './CalendarScreen.module.css'
 
@@ -29,7 +29,7 @@ export function CalendarScreen() {
   const [showModal, setShowModal] = useState(false)
   const [editBlock, setEditBlock] = useState<Block | null>(null)
 
-  const weekParam = weekStart.toISOString().slice(0, 10)
+  const weekParam = localDateStr(weekStart)
   const { data: blocks = [] }     = useBlocks(weekParam)
   const { data: categories = [] } = useCategories()
   const createBlock = useCreateBlock()
@@ -57,8 +57,8 @@ export function CalendarScreen() {
   const nowOffsetY  = ((now.getHours() + now.getMinutes() / 60) - DAY_START) * HOUR_HEIGHT
 
   function blocksForDay(day: Date): Block[] {
-    const dateStr = day.toISOString().slice(0, 10)
-    return blocks.filter(b => b.start_datetime.startsWith(dateStr))
+    const dateStr = localDateStr(day)
+    return blocks.filter(b => localDateStr(new Date(b.start_datetime)) === dateStr)
   }
 
   const rangeLabel = fmtDateRange(days[0], days[6])

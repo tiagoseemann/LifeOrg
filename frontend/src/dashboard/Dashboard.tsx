@@ -8,6 +8,7 @@ import { useColumns } from '../hooks/useColumns'
 import { useBlocks } from '../hooks/useBlocks'
 import { useCategories } from '../hooks/useCategories'
 import { useTodaySessions } from '../hooks/useSessions'
+import { localDateStr } from '../lib/format'
 import styles from './Dashboard.module.css'
 
 interface DashboardProps {
@@ -21,11 +22,11 @@ function getMondayOf(d: Date): string {
   const m    = new Date(d)
   m.setDate(d.getDate() + diff)
   m.setHours(0, 0, 0, 0)
-  return m.toISOString().slice(0, 10)
+  return localDateStr(m)
 }
 
 export function Dashboard({ onGoToKanban, onGoToCalendar }: DashboardProps) {
-  const today = new Date().toISOString().slice(0, 10)
+  const today = localDateStr(new Date())
 
   const { data: cards   = [] }         = useCards()
   const { data: columns = [] }         = useColumns()
@@ -46,7 +47,7 @@ export function Dashboard({ onGoToKanban, onGoToCalendar }: DashboardProps) {
   const totalFocusToday = todaySessions.reduce((s, sess) => s + (sess.elapsed_seconds ?? 0), 0)
 
   // Blocks for today
-  const todayBlocks = blocks.filter(b => b.start_datetime.startsWith(today))
+  const todayBlocks = blocks.filter(b => localDateStr(new Date(b.start_datetime)) === today)
 
   // Next upcoming block
   const now = new Date()

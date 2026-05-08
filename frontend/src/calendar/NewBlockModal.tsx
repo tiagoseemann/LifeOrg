@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Icon } from '../shell/Icon'
+import { localDateStr } from '../lib/format'
 import type { Category } from '../types/kanban'
 import type { Block } from '../types/calendar'
 import styles from './NewBlockModal.module.css'
@@ -15,10 +16,10 @@ interface NewBlockModalProps {
 
 export function NewBlockModal({ categories, initialDate, editBlock, onSave, onDelete, onClose }: NewBlockModalProps) {
   const titleRef = useRef<HTMLInputElement>(null)
-  const today = new Date().toISOString().slice(0, 10)
+  const today = localDateStr(new Date())
 
   const [title,      setTitle]      = useState(editBlock?.title ?? '')
-  const [date,       setDate]       = useState(editBlock ? editBlock.start_datetime.slice(0, 10) : (initialDate ?? today))
+  const [date,       setDate]       = useState(editBlock ? localDateStr(new Date(editBlock.start_datetime)) : (initialDate ?? today))
   const [startTime,  setStartTime]  = useState(editBlock ? editBlock.start_datetime.slice(11, 16) : '09:00')
   const [endTime,    setEndTime]    = useState(editBlock ? editBlock.end_datetime.slice(11, 16)   : '10:00')
   const [categoryId, setCategoryId] = useState<string | null>(editBlock?.category_id ?? null)

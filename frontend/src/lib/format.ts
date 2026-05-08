@@ -49,3 +49,8 @@ export function fmtTimer(totalSeconds: number): string {
   }
   return `${mm}:${ss}`
 }
+
+/** Returns "YYYY-MM-DD" in the user's LOCAL timezone (not UTC) */
+export function localDateStr(date: Date): string {
+  return date.toLocaleDateString('sv')  // 'sv' locale always formats as YYYY-MM-DD
+}
