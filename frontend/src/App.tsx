@@ -5,6 +5,8 @@ import { Sidebar } from './shell/Sidebar'
 import { TopBar } from './shell/TopBar'
 import { Placeholder } from './shell/Placeholder'
 import { KanbanScreen } from './kanban/KanbanScreen'
+import { CalendarScreen } from './calendar/CalendarScreen'
+import { FocusScreen } from './focus/FocusScreen'
 import type { Card } from './types/kanban'
 
 export function App() {
@@ -18,13 +20,18 @@ export function App() {
     setActive('focus')
   }
 
+  function handleGoToCard(cardId: string) {
+    selectCard(cardId)
+    setActive('kanban')
+  }
+
   function renderScreen() {
     switch (activeScreen) {
       case 'dashboard': return <Placeholder icon="dashboard" title="Dashboard" subtitle="Em breve" />
-      case 'calendar':  return <Placeholder icon="calendar"  title="Calendário" subtitle="Em breve" />
+      case 'calendar':  return <CalendarScreen />
       case 'kanban':    return <KanbanScreen onStartFocus={handleStartFocusFromCard} />
-      case 'focus':     return <Placeholder icon="focus"     title="Foco" subtitle="Em breve" />
-      case 'finance':   return <Placeholder icon="finance"   title="Financeiro" subtitle="Em desenvolvimento — Fase 2" />
+      case 'focus':     return <FocusScreen onGoToCard={handleGoToCard} />
+      case 'finance':   return <Placeholder icon="finance" title="Financeiro" subtitle="Em desenvolvimento — Fase 2" />
     }
   }
 
