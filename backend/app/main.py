@@ -28,3 +28,11 @@ async def verify_api_key(request: Request, call_next):
 
 
 app.include_router(health.router)
+
+from app.routers import categories as categories_router
+from app.routers import columns as columns_router
+from app.routers import cards as cards_router
+
+app.include_router(categories_router.router)
+app.include_router(columns_router.router)
+app.include_router(cards_router.router)
