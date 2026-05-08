@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { FocusRing } from './FocusRing'
 import { CardPicker } from './CardPicker'
 import { Icon } from '../shell/Icon'
@@ -6,7 +6,7 @@ import { fmtTimer, fmtDuration, fmtTime } from '../lib/format'
 import { useFocusStore, type DurKey } from '../store/focusStore'
 import { useCards } from '../hooks/useCards'
 import { useCategories } from '../hooks/useCategories'
-import { useActiveSession, useCreateSession, useDiscardSession, useEndSession, useHeartbeat, useTodaySessions } from '../hooks/useSessions'
+import { useActiveSession, useCreateSession, useDiscardSession, useEndSession, useTodaySessions } from '../hooks/useSessions'
 import type { Card } from '../types/kanban'
 import styles from './FocusScreen.module.css'
 
@@ -42,14 +42,6 @@ export function FocusScreen({ onGoToCard }: FocusScreenProps) {
   const createSession = useCreateSession()
   const endSession    = useEndSession()
   const discard       = useDiscardSession()
-  const heartbeat     = useHeartbeat(activeSessionId)
-
-  const heartbeatRef  = useRef<ReturnType<typeof setInterval> | null>(null)
-  // Refs keep the tick interval free of stale closures for mutation callbacks
-  const endSessionRef = useRef(endSession)
-  const resetRef      = useRef(reset)
-  useEffect(() => { endSessionRef.current = endSession }, [endSession])
-  useEffect(() => { resetRef.current = reset }, [reset])
 
   const catMap = Object.fromEntries(categories.map(c => [c.id, c]))
 
@@ -76,35 +68,6 @@ export function FocusScreen({ onGoToCard }: FocusScreenProps) {
       handleSelectCard(card)
     }
   }, [pendingCardId, cards])  // eslint-disable-line
-
-  // Tick interval
-  useEffect(() => {
-    if (!running) return
-    const id = setInterval(() => {
-      setElapsed(prev => {
-        const next = prev + 1
-        if (durationSeconds !== null && next >= durationSeconds) {
-          clearInterval(id)
-          setRunning(false)
-          if (activeSessionId) endSessionRef.current.mutate({ id: activeSessionId, elapsed_seconds: durationSeconds })
-          resetRef.current()
-          return durationSeconds
-        }
-        return next
-      })
-    }, 1000)
-    return () => clearInterval(id)
-  }, [running, durationSeconds, activeSessionId])  // eslint-disable-line
-
-  // Heartbeat every 30s
-  useEffect(() => {
-    if (!running || !activeSessionId) {
-      if (heartbeatRef.current) clearInterval(heartbeatRef.current)
-      return
-    }
-    heartbeatRef.current = setInterval(() => heartbeat.mutate(), 30_000)
-    return () => { if (heartbeatRef.current) clearInterval(heartbeatRef.current) }
-  }, [running, activeSessionId])  // eslint-disable-line
 
   const handleSelectCard = useCallback(async (card: Card) => {
     setShowPicker(false)

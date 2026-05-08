@@ -1,6 +1,7 @@
 import { useAppStore } from './store/appStore'
 import { useKanbanStore } from './store/kanbanStore'
 import { useFocusStore } from './store/focusStore'
+import { useFocusTimer } from './hooks/useFocusTimer'
 import { Sidebar } from './shell/Sidebar'
 import { TopBar } from './shell/TopBar'
 import { Placeholder } from './shell/Placeholder'
@@ -11,6 +12,7 @@ import { Dashboard } from './dashboard/Dashboard'
 import type { Card } from './types/kanban'
 
 export function App() {
+  useFocusTimer()
   const { activeScreen, setActive } = useAppStore()
   const { selectCard } = useKanbanStore()
   const { setPendingCardId } = useFocusStore()
