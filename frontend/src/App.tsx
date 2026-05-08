@@ -7,6 +7,7 @@ import { Placeholder } from './shell/Placeholder'
 import { KanbanScreen } from './kanban/KanbanScreen'
 import { CalendarScreen } from './calendar/CalendarScreen'
 import { FocusScreen } from './focus/FocusScreen'
+import { Dashboard } from './dashboard/Dashboard'
 import type { Card } from './types/kanban'
 
 export function App() {
@@ -27,7 +28,7 @@ export function App() {
 
   function renderScreen() {
     switch (activeScreen) {
-      case 'dashboard': return <Placeholder icon="dashboard" title="Dashboard" subtitle="Em breve" />
+      case 'dashboard': return <Dashboard onGoToKanban={() => setActive('kanban')} onGoToCalendar={() => setActive('calendar')} />
       case 'calendar':  return <CalendarScreen />
       case 'kanban':    return <KanbanScreen onStartFocus={handleStartFocusFromCard} />
       case 'focus':     return <FocusScreen onGoToCard={handleGoToCard} />
