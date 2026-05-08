@@ -32,7 +32,11 @@ app.include_router(health.router)
 from app.routers import categories as categories_router
 from app.routers import columns as columns_router
 from app.routers import cards as cards_router
+from app.routers import blocks as blocks_router
+from app.routers import sessions as sessions_router
 
 app.include_router(categories_router.router)
 app.include_router(columns_router.router)
 app.include_router(cards_router.router)
+app.include_router(blocks_router.router)
+app.include_router(sessions_router.router)
