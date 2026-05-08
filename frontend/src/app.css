@@ -23,6 +23,14 @@
   --color-border:        #D3D1C7;
   --color-border-hover:  #C0BDB1;
 
+  /* Danger */
+  --color-danger:        #DC2626;
+  --color-danger-hover:  #B91C1C;
+  --color-danger-bg:     #FEE2E2;
+
+  /* Neutral */
+  --color-white:         #FFFFFF;
+
   /* Category: Trabalho */
   --cat-trabalho-bg:     #FAECE7;
   --cat-trabalho-accent: #CC5200;

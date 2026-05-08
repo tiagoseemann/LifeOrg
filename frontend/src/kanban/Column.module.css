@@ -86,8 +86,8 @@
 }
 
 .headBtn.danger:hover {
-  background: #FEE2E2;
-  color: #B91C1C;
+  background: var(--color-danger-bg);
+  color: var(--color-danger-hover);
 }
 
 .cards {

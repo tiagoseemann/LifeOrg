@@ -15,7 +15,7 @@ import { Column } from './Column'
 import { KanbanCard } from './KanbanCard'
 import { Drawer } from './Drawer'
 import { useColumns, useCreateColumn, useDeleteColumn, useReorderColumns, useUpdateColumn } from '../hooks/useColumns'
-import { useCards, useCreateCard, useUpdateCard, useDeleteCard, useReorderCards } from '../hooks/useCards'
+import { useCards, useCreateCard, useUpdateCard, useDeleteCard, useReorderCards, type CardUpdatePayload } from '../hooks/useCards'
 import { useCategories } from '../hooks/useCategories'
 import { useKanbanStore } from '../store/kanbanStore'
 import type { Card } from '../types/kanban'
@@ -80,11 +80,19 @@ export function KanbanScreen({ onStartFocus }: KanbanScreenProps) {
       : overCard?.column_id ?? activeCard.column_id
 
     if (targetColumnId !== activeCard.column_id) {
-      const targetCards = cards
-        .filter(c => c.column_id === targetColumnId)
-        .sort((a, b) => a.position - b.position)
-        .map(c => c.id)
-      reorderCards.mutate({ columnId: targetColumnId, orderedIds: [...targetCards, activeCard.id] })
+      // Move card to new column: PATCH column_id first, then reorder within target column
+      updateCard.mutate(
+        { id: activeCard.id, column_id: targetColumnId },
+        {
+          onSuccess: () => {
+            const targetCards = cards
+              .filter(c => c.column_id === targetColumnId && c.id !== activeCard.id)
+              .sort((a, b) => a.position - b.position)
+              .map(c => c.id)
+            reorderCards.mutate({ columnId: targetColumnId, orderedIds: [...targetCards, activeCard.id] })
+          },
+        }
+      )
     } else {
       const colCards = cards
         .filter(c => c.column_id === activeCard.column_id)
@@ -97,7 +105,7 @@ export function KanbanScreen({ onStartFocus }: KanbanScreenProps) {
     }
   }
 
-  const handleCardChange = useCallback((updates: Partial<Card>) => {
+  const handleCardChange = useCallback((updates: Omit<CardUpdatePayload, 'id'>) => {
     if (!selectedCardId) return
     updateCard.mutate({ id: selectedCardId, ...updates })
   }, [selectedCardId, updateCard])

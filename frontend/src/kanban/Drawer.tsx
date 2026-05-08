@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Icon } from '../shell/Icon'
 import { fmtDuration } from '../lib/format'
+import type { CardUpdatePayload } from '../hooks/useCards'
 import type { Card, Category, Column } from '../types/kanban'
 import styles from './Drawer.module.css'
 
@@ -9,7 +10,7 @@ interface DrawerProps {
   columns: Column[]
   categories: Category[]
   onClose: () => void
-  onChange: (updates: Partial<Card>) => void
+  onChange: (updates: Omit<CardUpdatePayload, 'id'>) => void
   onStartFocus: (card: Card) => void
 }
 

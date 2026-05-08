@@ -83,7 +83,7 @@ export function Column({
             aria-label="Renomear coluna"
             onClick={() => setEditing(true)}
           >
-            <Icon id="check-square" size={14} />
+            <Icon id="pencil" size={14} />
           </button>
           <button
             className={`${styles.headBtn} ${styles.danger}`}

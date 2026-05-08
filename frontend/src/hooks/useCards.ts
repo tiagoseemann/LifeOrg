@@ -4,6 +4,19 @@ import type { Card } from '../types/kanban'
 
 const CARDS_KEY = ['cards']
 
+// Excludes read-only fields managed by the backend
+export type CardUpdatePayload = {
+  id: string
+  title?: string
+  column_id?: string
+  description?: string | null
+  category_id?: string | null
+  priority?: Card['priority'] | null
+  due_date?: string | null
+  time_estimate?: number | null
+  checklist?: Card['checklist']
+}
+
 export function useCards() {
   return useQuery({
     queryKey: CARDS_KEY,
@@ -26,7 +39,7 @@ export function useCreateCard() {
 export function useUpdateCard() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ id, ...data }: Partial<Card> & { id: string }) =>
+    mutationFn: ({ id, ...data }: CardUpdatePayload) =>
       apiFetch<Card>(`/api/cards/${id}`, {
         method: 'PATCH',
         body: JSON.stringify(data),

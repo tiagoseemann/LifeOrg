@@ -163,8 +163,8 @@
 .confirmCancel:hover { border-color: var(--color-border-hover); }
 
 .confirmDanger {
-  background: #DC2626;
-  color: #fff;
+  background: var(--color-danger);
+  color: var(--color-white);
   border: none;
   border-radius: 8px;
   padding: 7px 16px;
@@ -172,4 +172,4 @@
   cursor: pointer;
 }
 
-.confirmDanger:hover { background: #B91C1C; }
+.confirmDanger:hover { background: var(--color-danger-hover); }
