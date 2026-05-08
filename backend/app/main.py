@@ -3,7 +3,7 @@ from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from app.routers import health
 
-API_SECRET_KEY = os.environ.get("API_SECRET_KEY", "")
+API_SECRET_KEY = os.environ["API_SECRET_KEY"]
 
 app = FastAPI(title="LifeOrg API")
 
