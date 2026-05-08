@@ -9,5 +9,21 @@ export default defineConfig({
     watch: {
       usePolling: true,
     },
+    proxy: {
+      '/api': {
+        target: 'http://backend:8000',
+        changeOrigin: true,
+        configure: (proxy) => {
+          proxy.on('proxyReq', (proxyReq) => {
+            const apiKey = process.env.VITE_API_KEY ?? ''
+            proxyReq.setHeader('X-API-Key', apiKey)
+          })
+        },
+      },
+      '/health': {
+        target: 'http://backend:8000',
+        changeOrigin: true,
+      },
+    },
   },
 })
