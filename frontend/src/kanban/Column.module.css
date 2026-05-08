@@ -1,0 +1,117 @@
+.column {
+  background: var(--color-bg-surface);
+  border: 0.5px solid var(--color-border);
+  border-radius: 12px;
+  padding: 16px 14px;
+  min-height: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+}
+
+.column.progress {
+  background:
+    linear-gradient(180deg, var(--color-accent-bg), rgba(250,236,231,0)) 0 0 / 100% 160px no-repeat,
+    var(--color-bg-surface);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.labelInput {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--color-accent);
+  outline: none;
+  width: 100%;
+}
+
+.countBadge {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  background: var(--color-bg-base);
+  color: var(--color-text-secondary);
+  padding: 2px 6px;
+  border-radius: 999px;
+  border: 0.5px solid var(--color-border);
+}
+
+.headActions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+
+.column:hover .headActions {
+  opacity: 1;
+}
+
+.headBtn {
+  width: 24px;
+  height: 24px;
+  background: transparent;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+.headBtn:hover {
+  background: rgba(44,44,42,0.06);
+  color: var(--color-text-primary);
+}
+
+.headBtn.danger:hover {
+  background: var(--color-danger-bg);
+  color: var(--color-danger-hover);
+}
+
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.addBtn {
+  background: transparent;
+  border: none;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 6px 0;
+  text-align: left;
+  border-radius: 6px;
+  transition: color 0.12s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.addBtn:hover {
+  color: var(--color-accent);
+}

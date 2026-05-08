@@ -1,0 +1,115 @@
+.panel {
+  background: var(--color-bg-surface);
+  border: 0.5px solid var(--color-border);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.panelHead {
+  padding: 18px 20px;
+  border-bottom: 0.5px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.panelTitle {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 400;
+}
+
+.link {
+  font-size: 12px;
+  color: var(--color-accent);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-family: var(--font-sans);
+}
+
+.scroll {
+  overflow-y: auto;
+  flex: 1;
+  max-height: 380px;
+  padding: 12px 0;
+}
+
+.hourRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 0 16px;
+  min-height: 64px;
+  position: relative;
+}
+
+.hourLabel {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  width: 36px;
+  flex-shrink: 0;
+  padding-top: 4px;
+}
+
+.blocksWrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 4px 0;
+}
+
+.ablock {
+  border-radius: 6px;
+  padding: 6px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ablock.trabalho { background: var(--cat-trabalho-bg); border-left: 2px solid var(--cat-trabalho-accent); }
+.ablock.estudo   { background: var(--cat-estudo-bg);   border-left: 2px solid var(--cat-estudo-accent); }
+.ablock.pessoal  { background: var(--cat-pessoal-bg);  border: 0.5px solid var(--color-border); }
+.ablock.default  { background: var(--color-bg-base);   border-left: 2px solid var(--color-text-secondary); }
+
+.ablockTitle {
+  font-size: 13.5px;
+  color: var(--color-text-primary);
+}
+
+.ablockTime {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-secondary);
+}
+
+.nowLine {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 16px;
+}
+
+.nowLineBar {
+  flex: 1;
+  height: 1px;
+  background: var(--color-accent);
+}
+
+.nowLineTime {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-accent);
+  white-space: nowrap;
+}
+
+.empty {
+  padding: 24px 16px;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}

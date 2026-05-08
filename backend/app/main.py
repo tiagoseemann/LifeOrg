@@ -1,0 +1,42 @@
+import os
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from app.routers import health
+
+API_SECRET_KEY = os.environ["API_SECRET_KEY"]
+
+app = FastAPI(title="LifeOrg API")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+@app.middleware("http")
+async def verify_api_key(request: Request, call_next):
+    if request.url.path in ("/health", "/docs", "/openapi.json", "/redoc"):
+        return await call_next(request)
+    key = request.headers.get("X-API-Key", "")
+    if key != API_SECRET_KEY:
+        return JSONResponse(status_code=401, content={"detail": "Invalid API key"})
+    return await call_next(request)
+
+
+app.include_router(health.router)
+
+from app.routers import categories as categories_router
+from app.routers import columns as columns_router
+from app.routers import cards as cards_router
+from app.routers import blocks as blocks_router
+from app.routers import sessions as sessions_router
+
+app.include_router(categories_router.router)
+app.include_router(columns_router.router)
+app.include_router(cards_router.router)
+app.include_router(blocks_router.router)
+app.include_router(sessions_router.router)

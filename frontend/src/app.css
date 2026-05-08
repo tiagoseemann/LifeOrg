@@ -1,0 +1,143 @@
+/* =====================================================
+   LifeOrg — Design Tokens
+   Source of truth: DESIGN_SPEC.md §1
+   NEVER hardcode these hex values inside components.
+   ===================================================== */
+
+:root {
+  /* Brand */
+  --color-accent:        #CC5200;
+  --color-accent-hover:  #993C1D;
+  --color-accent-bg:     #FAECE7;
+
+  /* Surfaces */
+  --color-bg-base:       #F1EFE8;
+  --color-bg-surface:    #FFFFFF;
+  --color-bg-dark:       #1E1C1A;
+
+  /* Text */
+  --color-text-primary:  #2C2C2A;
+  --color-text-secondary:#888780;
+
+  /* Lines */
+  --color-border:        #D3D1C7;
+  --color-border-hover:  #C0BDB1;
+
+  /* Danger */
+  --color-danger:        #DC2626;
+  --color-danger-hover:  #B91C1C;
+  --color-danger-bg:     #FEE2E2;
+
+  /* Neutral */
+  --color-white:         #FFFFFF;
+
+  /* Category: Trabalho */
+  --cat-trabalho-bg:     #FAECE7;
+  --cat-trabalho-accent: #CC5200;
+  --cat-trabalho-text:   #6B2D10;
+
+  /* Category: Estudo */
+  --cat-estudo-bg:       #F1EFE8;
+  --cat-estudo-accent:   #888780;
+  --cat-estudo-text:     #3E4A3A;
+  --cat-estudo-time:     #5B6356;
+
+  /* Category: Pessoal */
+  --cat-pessoal-bg:      #FFFFFF;
+  --cat-pessoal-accent:  #D3D1C7;
+  --cat-pessoal-text:    #2C2C2A;
+
+  /* Typography */
+  --font-sans:    ui-sans-serif, -apple-system, "SF Pro Text",
+                  "Helvetica Neue", "Segoe UI", system-ui, sans-serif;
+  --font-display: ui-serif, "Iowan Old Style", "Charter", "Georgia",
+                  "Times New Roman", serif;
+  --font-mono:    ui-monospace, "SF Mono", "JetBrains Mono",
+                  "Menlo", "Consolas", monospace;
+
+  /* Shadows */
+  --shadow-card-hover:
+    0 1px 3px rgba(30,28,26,0.05),
+    0 8px 18px rgba(30,28,26,0.06);
+  --shadow-drawer: -16px 0 40px rgba(30,28,26,0.08);
+  --shadow-modal:  0 24px 60px rgba(30,28,26,0.22);
+  --shadow-metric-hover:
+    0 1px 3px rgba(30,28,26,0.04),
+    0 6px 16px rgba(30,28,26,0.04);
+
+  /* Layout anchors */
+  --sidebar-width:   56px;
+  --topbar-height:   56px;
+  --drawer-width:    380px;
+  --content-padding: 32px;
+}
+
+/* =====================================================
+   Reset + base
+   ===================================================== */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-text-primary);
+  background: var(--color-bg-base);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* =====================================================
+   App layout
+   ===================================================== */
+
+.app {
+  display: flex;
+  height: 100%;
+}
+
+.app__main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.app__content {
+  flex: 1;
+  overflow: auto;
+  padding: var(--content-padding);
+  background: var(--color-bg-base);
+}
+
+/* =====================================================
+   Screen entrance animation
+   ===================================================== */
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.screen-enter {
+  animation: fade-in-up 0.22s ease both;
+}
+
+/* =====================================================
+   Hoje badge pulse
+   ===================================================== */
+
+@keyframes pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(204,82,0,0.45); }
+  70%  { box-shadow: 0 0 0 6px rgba(204,82,0,0); }
+  100% { box-shadow: 0 0 0 0 rgba(204,82,0,0); }
+}

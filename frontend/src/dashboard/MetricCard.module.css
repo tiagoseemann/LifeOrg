@@ -1,0 +1,104 @@
+.card {
+  background: var(--color-bg-surface);
+  border: 0.5px solid var(--color-border);
+  border-radius: 12px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: border-color 0.12s ease, box-shadow 0.14s ease, transform 0.14s ease;
+}
+
+.card:hover {
+  border-color: var(--color-border-hover);
+  box-shadow: var(--shadow-metric-hover);
+  transform: translateY(-1px);
+}
+
+.label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+.value {
+  font-family: var(--font-display);
+  font-size: 38px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  color: var(--color-text-primary);
+}
+
+.valueMono {
+  font-family: var(--font-mono);
+  font-size: 30px;
+  font-weight: 500;
+  color: var(--color-accent);
+  line-height: 1;
+}
+
+.sub {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+
+.subTop {
+  margin-top: 8px;
+}
+
+.valueSuffix {
+  font-size: 15px;
+  font-family: var(--font-sans);
+  color: var(--color-text-secondary);
+}
+
+.progress {
+  height: 4px;
+  background: var(--color-bg-base);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--color-accent);
+  border-radius: 999px;
+  transition: width 0.35s ease;
+}
+
+.nextTime {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--color-accent);
+}
+
+.nextTitle {
+  font-size: 17px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.nextPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--color-accent-bg);
+  color: var(--color-accent);
+  font-size: 11px;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+.pulseDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  animation: pulse 2s infinite;
+  flex-shrink: 0;
+}

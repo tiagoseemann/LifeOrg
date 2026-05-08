@@ -1,0 +1,72 @@
+.topbar {
+  height: var(--topbar-height);
+  background: var(--color-bg-surface);
+  border-bottom: 0.5px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  flex-shrink: 0;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 19px;
+  font-weight: 400;
+  letter-spacing: -0.005em;
+  color: var(--color-text-primary);
+}
+
+.right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.iconBtn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+.iconBtn:hover {
+  background: rgba(44,44,42,0.06);
+  color: var(--color-text-primary);
+}
+
+.dateText {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  font-family: var(--font-sans);
+}
+
+.hojeBadge {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--color-accent-bg);
+  color: var(--color-accent);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.hojeDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  animation: pulse 2s infinite;
+  flex-shrink: 0;
+}
