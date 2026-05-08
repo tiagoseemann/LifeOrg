@@ -22,6 +22,17 @@ def create_column(payload: ColumnCreate, db: Session = Depends(get_db)):
     return col
 
 
+@router.patch("/reorder", response_model=list[ColumnOut])
+def reorder_columns(payload: ReorderColumnsPayload, db: Session = Depends(get_db)):
+    cols = {c.id: c for c in db.query(KanbanColumn).all()}
+    if set(payload.ordered_ids) != set(cols.keys()):
+        raise HTTPException(status_code=400, detail="ordered_ids must contain all column IDs")
+    for i, cid in enumerate(payload.ordered_ids):
+        cols[cid].position = i
+    db.commit()
+    return sorted(cols.values(), key=lambda c: c.position)
+
+
 @router.patch("/{column_id}", response_model=ColumnOut)
 def update_column(column_id: str, payload: ColumnUpdate, db: Session = Depends(get_db)):
     col = db.get(KanbanColumn, column_id)
@@ -48,14 +59,3 @@ def delete_column(column_id: str, db: Session = Depends(get_db)):
     for i, c in enumerate(remaining):
         c.position = i
     db.commit()
-
-
-@router.patch("/reorder", response_model=list[ColumnOut])
-def reorder_columns(payload: ReorderColumnsPayload, db: Session = Depends(get_db)):
-    cols = {c.id: c for c in db.query(KanbanColumn).all()}
-    if set(payload.ordered_ids) != set(cols.keys()):
-        raise HTTPException(status_code=400, detail="ordered_ids must contain all column IDs")
-    for i, cid in enumerate(payload.ordered_ids):
-        cols[cid].position = i
-    db.commit()
-    return sorted(cols.values(), key=lambda c: c.position)

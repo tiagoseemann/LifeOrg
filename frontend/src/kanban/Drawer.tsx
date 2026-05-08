@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Icon } from '../shell/Icon'
 import { fmtDuration } from '../lib/format'
 import type { Card, Category, Column } from '../types/kanban'
@@ -13,8 +13,46 @@ interface DrawerProps {
   onStartFocus: (card: Card) => void
 }
 
+function useDebounce<T>(value: T, delay: number): T {
+  const [debounced, setDebounced] = useState(value)
+  useEffect(() => {
+    const id = setTimeout(() => setDebounced(value), delay)
+    return () => clearTimeout(id)
+  }, [value, delay])
+  return debounced
+}
+
 export function Drawer({ card, columns, categories, onClose, onChange, onStartFocus }: DrawerProps) {
   const titleRef = useRef<HTMLInputElement>(null)
+
+  // Local state for text fields that need debounce
+  const [localTitle, setLocalTitle] = useState(card.title)
+  const [localDesc, setLocalDesc] = useState(card.description ?? '')
+
+  const debouncedTitle = useDebounce(localTitle, 450)
+  const debouncedDesc  = useDebounce(localDesc,  450)
+
+  // Keep local state in sync when a different card is opened
+  useEffect(() => {
+    setLocalTitle(card.title)
+    setLocalDesc(card.description ?? '')
+  }, [card.id])
+
+  // Flush debounced title to parent
+  useEffect(() => {
+    const trimmed = debouncedTitle.trim()
+    if (trimmed && trimmed !== card.title) {
+      onChange({ title: trimmed })
+    }
+  }, [debouncedTitle])  // eslint-disable-line
+
+  // Flush debounced description to parent
+  useEffect(() => {
+    const value = debouncedDesc || null
+    if (value !== card.description) {
+      onChange({ description: value })
+    }
+  }, [debouncedDesc])  // eslint-disable-line
 
   useEffect(() => {
     titleRef.current?.focus()
@@ -42,8 +80,8 @@ export function Drawer({ card, columns, categories, onClose, onChange, onStartFo
           <input
             ref={titleRef}
             className={styles.titleInput}
-            value={card.title}
-            onChange={e => onChange({ title: e.target.value })}
+            value={localTitle}
+            onChange={e => setLocalTitle(e.target.value)}
             placeholder="Título do card"
             aria-label="Título"
           />
@@ -52,8 +90,8 @@ export function Drawer({ card, columns, categories, onClose, onChange, onStartFo
             <label className={styles.fieldLabel}>Descrição</label>
             <textarea
               className={styles.textarea}
-              value={card.description ?? ''}
-              onChange={e => onChange({ description: e.target.value || null })}
+              value={localDesc}
+              onChange={e => setLocalDesc(e.target.value)}
               placeholder="Adicione uma descrição..."
             />
           </div>
