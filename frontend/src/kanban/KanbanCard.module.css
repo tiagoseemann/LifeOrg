@@ -1,0 +1,96 @@
+.card {
+  background: var(--color-bg-surface);
+  border: 0.5px solid var(--color-border);
+  border-radius: 8px;
+  padding: 12px 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  cursor: pointer;
+  transition: border-color 0.12s ease, box-shadow 0.14s ease, transform 0.14s ease;
+  position: relative;
+}
+
+.card:hover {
+  border-color: var(--color-border-hover);
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-1px);
+}
+
+.card.selected {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-accent-bg);
+}
+
+.card.inFocus {
+  border-left: 2px solid var(--color-accent);
+}
+
+.title {
+  font-size: 13.5px;
+  line-height: 1.35;
+  color: var(--color-text-primary);
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.tag {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 999px;
+  line-height: 1.4;
+}
+
+.tag.trabalho { background: var(--cat-trabalho-bg); color: var(--cat-trabalho-text); }
+.tag.estudo   { background: var(--cat-estudo-bg);   color: var(--cat-estudo-text); border: 0.5px solid var(--cat-estudo-accent); }
+.tag.pessoal  { background: var(--cat-pessoal-bg);  color: var(--cat-pessoal-text); border: 0.5px solid var(--cat-pessoal-accent); }
+.tag.custom   { background: var(--color-bg-base);   color: var(--color-text-secondary); border: 0.5px solid var(--color-border); }
+
+.inFocusBadge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--color-accent-bg);
+}
+
+.dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  flex-shrink: 0;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.date {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-secondary);
+}
+
+.sessions {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-secondary);
+}
