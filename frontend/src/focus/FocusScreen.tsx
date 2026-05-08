@@ -44,7 +44,13 @@ export function FocusScreen({ onGoToCard }: FocusScreenProps) {
   const discard       = useDiscardSession()
   const heartbeat     = useHeartbeat(activeSessionId)
 
-  const heartbeatRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const heartbeatRef  = useRef<ReturnType<typeof setInterval> | null>(null)
+  // Refs keep the tick interval free of stale closures for mutation callbacks
+  const endSessionRef = useRef(endSession)
+  const resetRef      = useRef(reset)
+  useEffect(() => { endSessionRef.current = endSession }, [endSession])
+  useEffect(() => { resetRef.current = reset }, [reset])
+
   const catMap = Object.fromEntries(categories.map(c => [c.id, c]))
 
   // Detect orphaned session on mount (RN-FOC-05)
@@ -80,8 +86,8 @@ export function FocusScreen({ onGoToCard }: FocusScreenProps) {
         if (durationSeconds !== null && next >= durationSeconds) {
           clearInterval(id)
           setRunning(false)
-          if (activeSessionId) endSession.mutate({ id: activeSessionId, elapsed_seconds: durationSeconds })
-          reset()
+          if (activeSessionId) endSessionRef.current.mutate({ id: activeSessionId, elapsed_seconds: durationSeconds })
+          resetRef.current()
           return durationSeconds
         }
         return next
@@ -150,33 +156,18 @@ export function FocusScreen({ onGoToCard }: FocusScreenProps) {
     <div className={styles.screen}>
       {/* Recovery modal */}
       {recoverySession && (
-        <div style={{
-          position: 'fixed', inset: 0, background: 'rgba(30,28,26,0.5)',
-          zIndex: 70, display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
-          <div style={{
-            background: 'var(--color-bg-surface)', borderRadius: 14,
-            padding: '28px 32px', maxWidth: 420, width: '90%',
-            boxShadow: 'var(--shadow-modal)', display: 'flex', flexDirection: 'column', gap: 16,
-          }}>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 400 }}>
-              Sessão interrompida
-            </h2>
-            <p style={{ fontSize: 14, color: 'var(--color-text-secondary)', lineHeight: 1.5 }}>
+        <div className={styles.recoveryOverlay}>
+          <div className={styles.recoveryBox}>
+            <h2 className={styles.recoveryTitle}>Sessão interrompida</h2>
+            <p className={styles.recoveryText}>
               Você tinha uma sessão ativa para <strong>{recoverySession.title}</strong>.
               Deseja contabilizar {fmtDuration(recoverySession.elapsed)}?
             </p>
-            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-              <button
-                onClick={handleRecoveryDiscard}
-                style={{ background: 'transparent', border: '0.5px solid var(--color-border)', borderRadius: 8, padding: '7px 16px', fontSize: 13, cursor: 'pointer' }}
-              >
+            <div className={styles.recoveryActions}>
+              <button className={styles.recoveryDiscard} onClick={handleRecoveryDiscard}>
                 Descartar
               </button>
-              <button
-                onClick={handleRecoveryCountabilize}
-                style={{ background: 'var(--color-accent)', color: 'var(--color-white)', border: 'none', borderRadius: 8, padding: '7px 20px', fontSize: 13, cursor: 'pointer' }}
-              >
+              <button className={styles.recoveryCountabilize} onClick={handleRecoveryCountabilize}>
                 Contabilizar {fmtDuration(recoverySession.elapsed)}
               </button>
             </div>

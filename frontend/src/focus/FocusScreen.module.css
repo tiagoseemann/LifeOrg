@@ -6,6 +6,72 @@
   animation: fade-in-up 0.22s ease both;
 }
 
+.recoveryOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(30,28,26,0.5);
+  z-index: 70;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.recoveryBox {
+  background: var(--color-bg-surface);
+  border-radius: 14px;
+  padding: 28px 32px;
+  max-width: 420px;
+  width: 90%;
+  box-shadow: var(--shadow-modal);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.recoveryTitle {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 400;
+}
+
+.recoveryText {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.recoveryActions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.recoveryDiscard {
+  background: transparent;
+  border: 0.5px solid var(--color-border);
+  border-radius: 8px;
+  padding: 7px 16px;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: var(--font-sans);
+}
+
+.recoveryCountabilize {
+  background: var(--color-accent);
+  color: var(--color-white);
+  border: none;
+  border-radius: 8px;
+  padding: 7px 20px;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  transition: background-color 0.12s ease;
+}
+
+.recoveryCountabilize:hover {
+  background: var(--color-accent-hover);
+}
+
 .stage {
   flex: 1;
   display: flex;

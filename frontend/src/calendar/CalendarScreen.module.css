@@ -179,7 +179,7 @@
   position: absolute;
   left: 0;
   right: 0;
-  border-top: 0.5px dashed #E5E3DA;
+  border-top: 0.5px dashed var(--color-border);
   pointer-events: none;
 }
 

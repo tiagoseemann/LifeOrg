@@ -59,6 +59,6 @@
 }
 
 .block.trabalho .time { color: var(--cat-trabalho-accent); }
-.block.estudo   .time { color: #5B6356; }
+.block.estudo   .time { color: var(--cat-estudo-time); }
 .block.pessoal  .time { color: var(--color-text-secondary); }
 .block.default  .time { color: var(--color-text-secondary); }
