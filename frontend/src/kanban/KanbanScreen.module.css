@@ -64,7 +64,7 @@
 
 .filterBtn.active {
   background: var(--color-accent);
-  color: #fff;
+  color: var(--color-white);
   border-color: var(--color-accent);
 }
 
@@ -87,7 +87,7 @@
 
 .ctaBtn {
   background: var(--color-accent);
-  color: #fff;
+  color: var(--color-white);
   border: none;
   border-radius: 999px;
   padding: 6px 14px;
