@@ -1,73 +1,63 @@
 #!/usr/bin/env sh
 set -eu
 
+# Resolve project root regardless of where the script is called from
 ROOT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 cd "$ROOT_DIR"
 
 usage() {
   cat <<'EOF'
-Uso:
-  ./scripts/dev.sh [comando]
+Uso: ./scripts/dev.sh [comando]
 
-Comandos:
-  up        Sobe a aplicacao com Docker Compose (padrao)
-  rebuild   Recria as imagens Docker e sobe a aplicacao
-  logs      Acompanha os logs dos containers
-  stop      Para os containers
-  down      Para e remove os containers
-  help      Mostra esta ajuda
+  up       Sobe a aplicação (padrão)
+  build    Reconstrói as imagens Docker e sobe
+  logs     Acompanha os logs em tempo real
+  stop     Para os containers sem remover
+  down     Para e remove os containers
+  help     Exibe esta ajuda
 EOF
 }
 
-compose() {
-  if docker compose version >/dev/null 2>&1; then
-    docker compose "$@"
-  elif command -v docker-compose >/dev/null 2>&1; then
-    docker-compose "$@"
-  else
-    echo "Docker Compose nao foi encontrado. Instale o Docker Desktop ou docker-compose." >&2
-    exit 1
-  fi
+dc() {
+  docker compose "$@"
 }
 
 ensure_env() {
-  if [ ! -s .env ]; then
-    if [ ! -f .env.example ]; then
-      echo ".env nao existe ou esta vazio, e .env.example nao foi encontrado." >&2
-      exit 1
-    fi
-
+  if [ ! -f .env ] || [ ! -s .env ]; then
     cp .env.example .env
-    echo "Criado .env a partir de .env.example."
+    echo "→ .env criado a partir de .env.example"
+    echo "  Edite .env e defina API_SECRET_KEY antes de continuar."
+    echo ""
   fi
 }
 
-command="${1:-up}"
+cmd="${1:-up}"
 
-case "$command" in
+case "$cmd" in
   up)
     ensure_env
-    compose up
+    echo "→ Subindo LifeOrg em http://localhost:3000"
+    dc up
     ;;
-  rebuild)
+  build)
     ensure_env
-    compose up --build
+    echo "→ Reconstruindo imagens e subindo..."
+    dc up --build
     ;;
   logs)
-    compose logs -f
+    dc logs -f
     ;;
   stop)
-    compose stop
+    dc stop
     ;;
   down)
-    compose down
+    dc down
     ;;
   help|--help|-h)
     usage
     ;;
   *)
-    echo "Comando desconhecido: $command" >&2
-    echo >&2
+    echo "Comando desconhecido: $cmd" >&2
     usage >&2
     exit 1
     ;;
