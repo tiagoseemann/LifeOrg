@@ -37,17 +37,23 @@ Sistema operacional pessoal. Une planejamento e execução do dia a dia em um ú
 git clone https://github.com/tiagoseemann/LifeOrg.git
 cd LifeOrg
 
-# 2. Configurar variáveis de ambiente
-cp .env.example .env
-# Edite .env e defina API_SECRET_KEY com qualquer string segura
-
-# 3. Subir
-docker compose up --build
+# 2. Subir
+./scripts/dev.sh
 ```
 
 Acesse **http://localhost:3000** no navegador.
 
+O script cria `.env` a partir de `.env.example` quando o arquivo não existe ou está vazio.
 Na primeira inicialização, as migrações do banco são aplicadas automaticamente. Três categorias padrão (Pessoal, Trabalho, Estudo) e três colunas Kanban (A fazer, Em progresso, Concluído) são criadas automaticamente.
+
+Comandos úteis:
+
+```bash
+./scripts/dev.sh rebuild  # recria as imagens Docker e sobe a aplicação
+./scripts/dev.sh logs     # acompanha os logs dos containers
+./scripts/dev.sh stop     # para os containers
+./scripts/dev.sh down     # para e remove os containers
+```
 
 ---
 
@@ -99,6 +105,8 @@ Os dados persistem em `./data/postgres/` (volume local montado no container Post
 ```
 .
 ├── docker-compose.yml
+├── scripts/
+│   └── dev.sh              ← inicialização rápida via Docker Compose
 ├── .env.example
 ├── backend/
 │   ├── Dockerfile
