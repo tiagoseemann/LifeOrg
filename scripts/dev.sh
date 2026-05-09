@@ -31,17 +31,29 @@ ensure_env() {
   fi
 }
 
+port() {
+  # Read FRONTEND_PORT from environment or .env, default 3000
+  if [ -n "${FRONTEND_PORT:-}" ]; then
+    echo "$FRONTEND_PORT"
+  elif [ -f .env ]; then
+    val=$(sed -n 's/^FRONTEND_PORT=//p' .env | tail -n 1)
+    echo "${val:-3000}"
+  else
+    echo "3000"
+  fi
+}
+
 cmd="${1:-up}"
 
 case "$cmd" in
   up)
     ensure_env
-    echo "→ Subindo LifeOrg em http://localhost:3000"
+    echo "→ Subindo LifeOrg em http://localhost:$(port)"
     dc up
     ;;
   build)
     ensure_env
-    echo "→ Reconstruindo imagens e subindo..."
+    echo "→ Reconstruindo imagens e subindo em http://localhost:$(port)"
     dc up --build
     ;;
   logs)
