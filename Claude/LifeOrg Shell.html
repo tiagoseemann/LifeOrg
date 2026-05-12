@@ -1,0 +1,3362 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<title>LifeOrg — Shell</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<style>
+  :root {
+    --color-accent:        #CC5200;
+    --color-accent-hover:  #993C1D;
+    --color-accent-bg:     #FAECE7;
+    --color-bg-base:       #F1EFE8;
+    --color-bg-surface:    #FFFFFF;
+    --color-bg-dark:       #1E1C1A;
+    --color-text-primary:  #2C2C2A;
+    --color-text-secondary:#888780;
+    --color-border:        #D3D1C7;
+
+    --font-sans: ui-sans-serif, -apple-system, "SF Pro Text", "Helvetica Neue",
+                 "Segoe UI", system-ui, sans-serif;
+    --font-display: ui-serif, "Iowan Old Style", "Charter", "Georgia",
+                    "Times New Roman", serif;
+    --font-mono: ui-monospace, "SF Mono", "JetBrains Mono",
+                 "Menlo", "Consolas", monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    font-family: var(--font-sans);
+    color: var(--color-text-primary);
+    background: var(--color-bg-base);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+
+  /* ---- App layout ---- */
+  .app {
+    display: grid;
+    grid-template-columns: 56px 1fr;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* ---- Sidebar ---- */
+  .sidebar {
+    background: var(--color-bg-dark);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 14px 0;
+    gap: 6px;
+  }
+  .sidebar__brand {
+    width: 36px; height: 36px;
+    display: grid; place-items: center;
+    color: var(--color-accent);
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 18px;
+    letter-spacing: 0.02em;
+    margin-bottom: 18px;
+  }
+  .sidebar__nav {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 4px;
+    flex: 1;
+    align-items: center;
+  }
+  .nav-btn {
+    width: 40px; height: 40px;
+    border-radius: 8px;
+    display: grid; place-items: center;
+    color: var(--color-text-secondary);
+    transition: background-color .12s ease, color .12s ease;
+    position: relative;
+  }
+  .nav-btn svg { width: 19px; height: 19px; display: block; }
+  .nav-btn:hover {
+    color: #d6d4cd;
+    background: rgba(255,255,255,0.04);
+  }
+  .nav-btn.is-active {
+    background: var(--color-accent);
+    color: #fff;
+  }
+  .nav-btn.is-active:hover { background: var(--color-accent); color: #fff; }
+  .nav-btn .tip {
+    position: absolute;
+    left: calc(100% + 10px);
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--color-text-primary);
+    color: #fff;
+    padding: 5px 9px;
+    border-radius: 6px;
+    font-size: 12px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity .12s ease;
+    z-index: 10;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+  }
+  .nav-btn:hover .tip { opacity: 1; }
+  .sidebar__foot {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 8px; padding-bottom: 4px;
+  }
+  .avatar {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #d4a373 0%, #b07452 100%);
+    display: grid; place-items: center;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+
+  /* ---- Main column ---- */
+  .main {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    background: var(--color-bg-base);
+  }
+
+  /* ---- Top bar ---- */
+  .topbar {
+    height: 56px;
+    background: var(--color-bg-surface);
+    border-bottom: 0.5px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px 0 28px;
+    flex-shrink: 0;
+  }
+  .topbar__title {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 19px;
+    letter-spacing: -0.005em;
+    color: var(--color-text-primary);
+  }
+  .topbar__right {
+    display: flex; align-items: center; gap: 14px;
+  }
+  .topbar__date {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    letter-spacing: 0.005em;
+  }
+  .topbar__date strong {
+    color: var(--color-text-primary);
+    font-weight: 500;
+  }
+  .badge-today {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px 4px 8px;
+    background: var(--color-accent-bg);
+    color: var(--color-accent);
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+  }
+  .badge-today .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--color-accent);
+  }
+  .topbar__icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: grid; place-items: center;
+    color: var(--color-text-secondary);
+    transition: background-color .12s ease, color .12s ease;
+  }
+  .topbar__icon:hover {
+    background: var(--color-bg-base);
+    color: var(--color-text-primary);
+  }
+
+  /* ---- Content area ---- */
+  .content {
+    flex: 1;
+    overflow: auto;
+    padding: 32px;
+  }
+
+  /* ---- Eyebrow / labels ---- */
+  .eyebrow {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+  }
+
+  /* ---- Placeholder card ---- */
+  .placeholder {
+    background: var(--color-bg-surface);
+    border: 0.5px solid var(--color-border);
+    border-radius: 12px;
+    padding: 56px 48px;
+    max-width: 720px;
+    margin: 0 auto;
+    margin-top: 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+  .placeholder__icon {
+    width: 56px; height: 56px;
+    border-radius: 12px;
+    background: var(--color-accent-bg);
+    color: var(--color-accent);
+    display: grid; place-items: center;
+  }
+  .placeholder__icon svg { width: 26px; height: 26px; }
+  .placeholder__eyebrow {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+  }
+  .placeholder__title {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 36px;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    color: var(--color-text-primary);
+    margin: 0;
+  }
+  .placeholder__body {
+    color: var(--color-text-secondary);
+    font-size: 15px;
+    line-height: 1.55;
+    max-width: 52ch;
+    margin: 0;
+  }
+  .placeholder__meta {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+    align-items: center;
+  }
+  .meta-item {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 12px 6px 10px;
+    background: var(--color-bg-base);
+    border-radius: 999px;
+    font-size: 12px;
+    color: var(--color-text-secondary);
+  }
+  .meta-item .dot-soft {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--color-text-secondary);
+    opacity: 0.6;
+  }
+
+  .placeholder__divider {
+    height: 0.5px;
+    background: var(--color-border);
+    align-self: stretch;
+  }
+
+  .placeholder__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    background: var(--color-accent);
+    color: #fff;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.005em;
+    transition: background-color .12s ease;
+  }
+  .placeholder__cta:hover { background: var(--color-accent-hover); }
+  .placeholder__cta svg { width: 14px; height: 14px; }
+
+  /* Subtle entrance for the placeholder when switching */
+  @keyframes fade-in-up {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .placeholder { animation: fade-in-up .22s ease both; }
+
+  /* =========================================================
+     DASHBOARD
+     ========================================================= */
+  .dashboard {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    animation: fade-in-up .22s ease both;
+  }
+
+  /* ---- Metric cards ---- */
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .card {
+    background: var(--color-bg-surface);
+    border: 0.5px solid var(--color-border);
+    border-radius: 12px;
+    padding: 22px 22px 20px;
+    transition: border-color .15s ease, transform .15s ease,
+                box-shadow .15s ease;
+  }
+  .metric {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-height: 138px;
+  }
+  .metric:hover {
+    border-color: #c0bdb1;
+    transform: translateY(-1px);
+    box-shadow: 0 1px 3px rgba(30,28,26,0.04),
+                0 6px 16px rgba(30,28,26,0.04);
+  }
+  .metric__label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .metric__label .glyph {
+    width: 14px; height: 14px;
+    color: var(--color-text-secondary);
+    opacity: 0.7;
+  }
+  .metric__value {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 38px;
+    line-height: 1;
+    letter-spacing: -0.01em;
+    color: var(--color-text-primary);
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+  .metric__value .small {
+    font-family: var(--font-sans);
+    font-size: 15px;
+    color: var(--color-text-secondary);
+    letter-spacing: 0;
+  }
+  .metric__value.is-mono {
+    font-family: var(--font-mono);
+    color: var(--color-accent);
+    font-size: 30px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+  .metric__sub {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    margin-top: auto;
+  }
+  .metric__sub strong {
+    color: var(--color-text-primary);
+    font-weight: 500;
+  }
+
+  /* ---- Progress bar ---- */
+  .progress {
+    height: 4px;
+    background: var(--color-bg-base);
+    border-radius: 999px;
+    overflow: hidden;
+    position: relative;
+  }
+  .progress__fill {
+    height: 100%;
+    background: var(--color-accent);
+    border-radius: 999px;
+    transition: width .35s ease;
+  }
+
+  /* ---- Countdown pill ---- */
+  .countdown {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px 4px 8px;
+    background: var(--color-accent-bg);
+    color: var(--color-accent);
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+    width: fit-content;
+  }
+  .countdown::before {
+    content: "";
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    box-shadow: 0 0 0 0 rgba(204,82,0,0.5);
+    animation: pulse 1.8s ease-out infinite;
+  }
+  @keyframes pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(204,82,0,0.45); }
+    70%  { box-shadow: 0 0 0 6px rgba(204,82,0,0); }
+    100% { box-shadow: 0 0 0 0 rgba(204,82,0,0); }
+  }
+
+  .next-block-title {
+    font-family: var(--font-sans);
+    font-size: 17px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    line-height: 1.25;
+  }
+  .next-block-time {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--color-accent);
+    margin-bottom: 4px;
+  }
+
+  /* ---- Split (kanban + agenda) ---- */
+  .split {
+    display: grid;
+    grid-template-columns: minmax(0, 6fr) minmax(0, 4fr);
+    gap: 16px;
+    align-items: stretch;
+  }
+
+  .panel {
+    background: var(--color-bg-surface);
+    border: 0.5px solid var(--color-border);
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .panel__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 18px 20px 14px;
+  }
+  .panel__title {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 18px;
+    letter-spacing: -0.005em;
+    color: var(--color-text-primary);
+  }
+  .panel__link {
+    font-size: 12px;
+    color: var(--color-accent);
+    transition: color .12s ease;
+  }
+  .panel__link:hover { color: var(--color-accent-hover); }
+
+  /* ---- Kanban preview ---- */
+  .kanban {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    padding: 0 20px 20px;
+    flex: 1;
+    min-height: 0;
+  }
+  .kcol {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+  }
+  .kcol__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 2px 8px;
+    border-bottom: 0.5px solid var(--color-border);
+    margin-bottom: 4px;
+  }
+  .kcol__name {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+  }
+  .kcol__count {
+    font-size: 11px;
+    color: var(--color-text-secondary);
+    background: var(--color-bg-base);
+    padding: 1px 7px;
+    border-radius: 999px;
+    min-width: 20px;
+    text-align: center;
+  }
+  .kcard {
+    background: var(--color-bg-surface);
+    border: 0.5px solid var(--color-border);
+    border-radius: 8px;
+    padding: 12px 13px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    cursor: grab;
+    transition: transform .14s ease, box-shadow .14s ease,
+                border-color .14s ease;
+  }
+  .kcard:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 1px 3px rgba(30,28,26,0.05),
+                0 8px 18px rgba(30,28,26,0.06);
+    border-color: #c0bdb1;
+  }
+  .kcard.is-active {
+    border-left: 2px solid var(--color-accent);
+    padding-left: 12px;
+  }
+  .kcard__title {
+    font-size: 13px;
+    color: var(--color-text-primary);
+    line-height: 1.35;
+  }
+  .kcard__meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 11px;
+    color: var(--color-text-secondary);
+  }
+  .ktag {
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-weight: 500;
+    padding: 2px 7px;
+    border-radius: 4px;
+    background: var(--color-bg-base);
+    color: var(--color-text-secondary);
+  }
+  .ktag.tag-trabalho  { background: var(--color-accent-bg); color: var(--color-accent); }
+  .ktag.tag-estudo    { background: #ECEEEA; color: #5b6356; }
+  .ktag.tag-pessoal   { background: #F4F1EB; color: #7a6b56; }
+
+  .kcard__foot {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--color-text-secondary);
+    font-family: var(--font-mono);
+  }
+  .kcard__foot svg { width: 12px; height: 12px; opacity: 0.7; }
+
+  /* ---- Agenda (right pane) ---- */
+  .agenda {
+    --hour-h: 64px;
+    --start: 9;     /* 9:00 */
+    --end: 18;      /* 18:00 */
+    padding: 0 20px 20px;
+    flex: 1;
+    overflow: hidden;
+  }
+  .agenda__wrap {
+    position: relative;
+    display: grid;
+    grid-template-columns: 44px 1fr;
+    gap: 10px;
+    height: calc((var(--end) - var(--start)) * var(--hour-h));
+  }
+  .agenda__hours {
+    position: relative;
+  }
+  .agenda__hour {
+    position: absolute;
+    left: 0; right: 0;
+    height: var(--hour-h);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--color-text-secondary);
+    letter-spacing: 0.02em;
+    padding-top: 0;
+    text-align: right;
+    transform: translateY(-6px);
+  }
+  .agenda__track {
+    position: relative;
+    border-left: 0.5px solid var(--color-border);
+    padding-left: 0;
+  }
+  .agenda__gridline {
+    position: absolute;
+    left: 0; right: 0;
+    height: 0;
+    border-top: 0.5px dashed #E3E1D8;
+  }
+  .ablock {
+    position: absolute;
+    left: 8px;
+    right: 0;
+    border-radius: 8px;
+    padding: 8px 10px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform .14s ease, box-shadow .14s ease,
+                filter .14s ease;
+    border: 0.5px solid var(--color-border);
+    background: var(--color-bg-surface);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .ablock:hover {
+    transform: translateX(1px);
+    box-shadow: 0 2px 8px rgba(30,28,26,0.06);
+    filter: brightness(0.99);
+  }
+  .ablock--trabalho { background: var(--color-accent-bg); border-color: #f0d8cd; }
+  .ablock--estudo   { background: #ECEEEA; border-color: #DDE0DA; }
+  .ablock--pessoal  { background: var(--color-bg-surface); border-color: var(--color-border); }
+  .ablock__title {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    line-height: 1.25;
+  }
+  .ablock--trabalho .ablock__title { color: #6b2d10; }
+  .ablock--estudo   .ablock__title { color: #3e4a3a; }
+  .ablock__time {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--color-text-secondary);
+  }
+  .ablock--trabalho .ablock__time { color: var(--color-accent); }
+
+  .now-line {
+    position: absolute;
+    left: -6px; right: 0;
+    height: 1px;
+    background: var(--color-accent);
+    z-index: 5;
+    pointer-events: none;
+  }
+  .now-line::before {
+    content: "";
+    position: absolute;
+    left: -4px; top: -3px;
+    width: 8px; height: 8px;
+    background: var(--color-accent);
+    border-radius: 50%;
+  }
+  .now-line__label {
+    position: absolute;
+    right: 0;
+    top: -8px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--color-accent);
+    background: var(--color-bg-surface);
+    padding: 0 4px;
+  }
+
+  /* ---- Pie chart panel ---- */
+  .chart-panel { display: grid; grid-template-columns: 220px 1fr; gap: 28px; align-items: center; padding: 18px 22px 22px; }
+  .chart-panel .panel__head { padding: 0 0 6px 0; grid-column: 1 / -1; }
+  .pie-center {
+    position: relative;
+    width: 180px; height: 180px;
+    display: grid; place-items: center;
+  }
+  .pie-center svg { width: 180px; height: 180px; display: block; }
+  .pie-center__inner {
+    position: absolute;
+    inset: 0;
+    display: grid; place-items: center;
+    text-align: center;
+    pointer-events: none;
+  }
+  .pie-total {
+    font-family: var(--font-mono);
+    font-size: 22px;
+    color: var(--color-text-primary);
+    letter-spacing: -0.01em;
+    line-height: 1;
+  }
+  .pie-total-lbl {
+    font-size: 10px;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+    margin-top: 4px;
+  }
+  .pie-slice { transition: opacity .15s ease; cursor: pointer; }
+  .pie-slice:hover { opacity: 0.82; }
+  .legend { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+  .legend__row {
+    display: grid;
+    grid-template-columns: 12px 1fr auto auto;
+    align-items: center;
+    column-gap: 12px;
+    row-gap: 6px;
+    font-size: 13px;
+    color: var(--color-text-primary);
+  }
+  .legend__sw { width: 10px; height: 10px; border-radius: 2px; }
+  .legend__name { text-transform: capitalize; }
+  .legend__time { font-family: var(--font-mono); color: var(--color-text-secondary); font-size: 12px; }
+  .legend__pct { font-family: var(--font-mono); color: var(--color-text-primary); font-size: 12px; min-width: 38px; text-align: right; }
+  .legend__bar { grid-column: 1 / -1; height: 3px; background: var(--color-bg-base); border-radius: 999px; overflow: hidden; }
+  .legend__bar > span { display: block; height: 100%; border-radius: 999px; transition: width .35s ease; }
+
+  @media (max-width: 880px) {
+    .split { grid-template-columns: 1fr; }
+    .chart-panel { grid-template-columns: 1fr; justify-items: center; }
+  }
+  /* =========================================================
+     KANBAN SCREEN
+     ========================================================= */
+  .kb {
+    display: flex; flex-direction: column;
+    height: 100%;
+    gap: 18px;
+    animation: fade-in-up .22s ease both;
+  }
+  .kb__head {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px; flex-wrap: wrap;
+  }
+  .kb__title {
+    display: flex; align-items: baseline; gap: 12px;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 26px;
+    letter-spacing: -0.01em;
+    color: var(--color-text-primary);
+  }
+  .kb__count {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    padding: 2px 9px;
+    background: var(--color-bg-surface);
+    border: 0.5px solid var(--color-border);
+    border-radius: 999px;
+  }
+  .kb__filters { display: flex; gap: 6px; align-items: center; }
+  .filter-pill {
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    background: var(--color-bg-surface);
+    border: 0.5px solid var(--color-border);
+    transition: background-color .12s ease, color .12s ease, border-color .12s ease;
+    text-transform: capitalize;
+  }
+  .filter-pill:hover { background: var(--color-accent-bg); color: var(--color-accent); border-color: #f0d8cd; }
+  .filter-pill.is-on { background: var(--color-accent); color: #fff; border-color: var(--color-accent); }
+
+  .kb__cta {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 9px 16px 9px 12px;
+    background: var(--color-accent); color: #fff;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    transition: background-color .12s ease;
+  }
+  .kb__cta:hover { background: var(--color-accent-hover); }
+  .kb__cta svg { width: 14px; height: 14px; }
+
+  .kb__board {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    align-items: start;
+  }
+  .kbcol {
+    background: var(--color-bg-surface);
+    border: 0.5px solid var(--color-border);
+    border-radius: 12px;
+    padding: 16px 14px 12px;
+    display: flex; flex-direction: column; gap: 12px;
+    min-height: 320px;
+  }
+  .kbcol--progress {
+    background: linear-gradient(180deg, var(--color-accent-bg), rgba(250,236,231,0));
+    background-color: var(--color-bg-surface);
+  }
+  .kbcol__head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 4px;
+  }
+  .kbcol__name {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+  }
+  .kbcol__count {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--color-text-secondary);
+    padding: 1px 8px;
+    background: var(--color-bg-base);
+    border-radius: 999px;
+  }
+  .kbcol__cards { display: flex; flex-direction: column; gap: 8px; }
+  .kbcol__add {
+    display: flex; align-items: center; justify-content: center;
+    gap: 6px;
+    padding: 8px;
+    color: var(--color-text-secondary);
+    border-radius: 8px;
+    border: 0.5px dashed transparent;
+    transition: background-color .12s ease, border-color .12s ease, color .12s ease;
+    font-size: 12px;
+  }
+  .kbcol__add:hover {
+    background: var(--color-bg-base);
+    border-color: var(--color-border);
+    color: var(--color-text-primary);
+  }
+
+  .kb-card {
+    background: var(--color-bg-surface);
+    border: 0.5px solid var(--color-border);
+    border-radius: 8px;
+    padding: 12px 13px;
+    display: flex; flex-direction: column; gap: 8px;
+    cursor: pointer;
+    text-align: left;
+    width: 100%;
+    transition: transform .14s ease, box-shadow .14s ease, border-color .14s ease;
+  }
+  .kb-card:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 1px 3px rgba(30,28,26,0.05),
+                0 8px 18px rgba(30,28,26,0.06);
+    border-color: #c0bdb1;
+  }
+  .kb-card.is-focus {
+    border-left: 2px solid var(--color-accent);
+    padding-left: 12px;
+  }
+  .kb-card.is-selected {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px var(--color-accent-bg);
+  }
+  .kb-card__title {
+    font-size: 13.5px;
+    color: var(--color-text-primary);
+    line-height: 1.35;
+  }
+  .kb-card__row {
+    display: flex; align-items: center; gap: 8px;
+    flex-wrap: wrap;
+  }
+  .kb-card__date {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--color-text-secondary);
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  .kb-card__focus {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--color-text-secondary);
+  }
+  .kb-card__focus svg { width: 11px; height: 11px; }
+  .kb-card__badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 2px 8px 2px 7px;
+    background: var(--color-accent-bg);
+    color: var(--color-accent);
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .kb-card__badge::before {
+    content: "";
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--color-accent);
+  }
+
+  /* ---- Side panel (drawer) ---- */
+  .drawer-overlay {
+    position: fixed; inset: 0;
+    background: rgba(30,28,26,0.18);
+    z-index: 90;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s ease;
+  }
+  .drawer-overlay.is-open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .drawer {
+    position: fixed;
+    top: 0; right: 0;
+    height: 100vh;
+    width: 380px;
+    background: var(--color-bg-surface);
+    border-left: 0.5px solid var(--color-border);
+    box-shadow: -16px 0 40px rgba(30,28,26,0.08);
+    transform: translateX(100%);
+    transition: transform .26s cubic-bezier(0.32, 0.72, 0, 1);
+    z-index: 95;
+    display: flex; flex-direction: column;
+  }
+  .drawer.is-open { transform: translateX(0); }
+  .drawer__head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 16px 12px 20px;
+    border-bottom: 0.5px solid var(--color-border);
+  }
+  .drawer__head .eyebrow {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+  }
+  .drawer__close {
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    color: var(--color-text-secondary);
+    display: grid; place-items: center;
+    transition: background-color .12s ease, color .12s ease;
+  }
+  .drawer__close:hover { background: var(--color-bg-base); color: var(--color-text-primary); }
+  .drawer__close svg { width: 16px; height: 16px; }
+
+  .drawer__body {
+    flex: 1; overflow-y: auto;
+    padding: 18px 20px 20px;
+    display: flex; flex-direction: column; gap: 18px;
+  }
+  .drawer__title {
+    width: 100%;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 22px;
+    letter-spacing: -0.01em;
+    color: var(--color-text-primary);
+    background: transparent;
+    border: 0;
+    border-bottom: 0.5px solid transparent;
+    padding: 4px 0;
+    transition: border-color .15s ease;
+    line-height: 1.25;
+  }
+  .drawer__title:hover { border-bottom-color: var(--color-border); }
+  .drawer__title:focus { outline: none; border-bottom-color: var(--color-accent); }
+
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field__lbl {
+    font-size: 10px; font-weight: 500;
+    letter-spacing: 0.07em; text-transform: uppercase;
+    color: var(--color-text-secondary);
+  }
+  .field__input, .field__textarea, .field__select {
+    width: 100%;
+    background: var(--color-bg-base);
+    border: 0.5px solid var(--color-border);
+    border-radius: 8px;
+    padding: 8px 11px;
+    font: inherit;
+    color: var(--color-text-primary);
+    transition: border-color .12s ease, background-color .12s ease;
+  }
+  .field__input:hover, .field__textarea:hover, .field__select:hover { border-color: #c0bdb1; }
+  .field__input:focus, .field__textarea:focus, .field__select:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    background: var(--color-bg-surface);
+  }
+  .field__textarea { min-height: 90px; resize: vertical; line-height: 1.5; }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .sessions { display: flex; flex-direction: column; gap: 0; }
+  .session {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 0;
+    border-top: 0.5px solid var(--color-border);
+    font-size: 12px;
+  }
+  .session:first-child { border-top: 0; }
+  .session__date {
+    color: var(--color-text-secondary);
+    font-size: 11px;
+    flex: 1;
+    display: flex; flex-direction: column; gap: 2px;
+  }
+  .session__date strong {
+    color: var(--color-text-primary);
+    font-weight: 500;
+    font-size: 12px;
+  }
+  .session__dur {
+    font-family: var(--font-mono);
+    color: var(--color-accent);
+    font-weight: 500;
+  }
+  .sessions__sum {
+    display: flex; justify-content: space-between;
+    padding-top: 12px; margin-top: 2px;
+    border-top: 0.5px solid var(--color-border);
+    font-size: 11px;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+  }
+  .sessions__sum strong {
+    font-family: var(--font-mono);
+    color: var(--color-text-primary);
+    font-weight: 500;
+    font-size: 13px;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  .drawer__foot {
+    padding: 14px 20px 18px;
+    border-top: 0.5px solid var(--color-border);
+  }
+  .drawer__cta {
+    width: 100%;
+    display: inline-flex; align-items: center; justify-content: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background: var(--color-accent);
+    color: #fff;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color .12s ease, transform .12s ease;
+  }
+  .drawer__cta:hover { background: var(--color-accent-hover); }
+  .drawer__cta:active { transform: scale(0.99); }
+  .drawer__cta svg { width: 14px; height: 14px; }
+
+  @media (max-width: 880px) {
+    .kb__board { grid-template-columns: 1fr; }
+    .drawer { width: 100%; }
+  }
+
+  @media (max-width: 640px) {
+    .metrics { grid-template-columns: 1fr; }
+  }
+
+  /* =========================================================
+     FOCUS SCREEN
+     ========================================================= */
+  .foco {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+    margin: -32px;          /* eat content padding so footer reaches edges */
+    animation: fade-in-up .22s ease both;
+  }
+  .foco__stage {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 28px;
+    padding: 48px 32px;
+    text-align: center;
+  }
+  .foco__eyebrow {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+  }
+  .foco__task {
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+  }
+  .foco__task-name {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 32px;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    color: var(--color-text-primary);
+    margin: 0;
+    max-width: 620px;
+    text-wrap: pretty;
+  }
+  .foco__task-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+  }
+  .foco__task-tag .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    opacity: 0.7;
+  }
+  .foco__ring-wrap {
+    position: relative;
+    width: 340px; height: 340px;
+    display: grid; place-items: center;
+  }
+  .foco__ring {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    transform: rotate(-90deg);
+  }
+  .foco__ring-bg {
+    fill: none;
+    stroke: var(--color-border);
+    stroke-width: 2;
+    opacity: 0.6;
+  }
+  .foco__ring-fg {
+    fill: none;
+    stroke: var(--color-accent);
+    stroke-width: 3;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.95s linear;
+  }
+  .foco__timer {
+    font-family: var(--font-mono);
+    font-size: 96px;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    color: var(--color-accent);
+    font-weight: 400;
+    font-variant-numeric: tabular-nums;
+  }
+  .foco__timer.is-paused {
+    opacity: 0.55;
+    transition: opacity .25s ease;
+  }
+  .foco__controls {
+    display: flex; gap: 8px;
+    align-items: center;
+  }
+  .foco__ctrl {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    border: 0.5px solid var(--color-border);
+    background: transparent;
+    transition: color .12s ease, border-color .12s ease, background-color .12s ease;
+  }
+  .foco__ctrl:hover {
+    color: var(--color-text-primary);
+    border-color: #c0bdb1;
+    background: var(--color-bg-surface);
+  }
+  .foco__ctrl svg { width: 11px; height: 11px; }
+
+  /* Idle */
+  .foco__idle-icon {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    background: var(--color-accent-bg);
+    color: var(--color-accent);
+    display: grid; place-items: center;
+    margin-bottom: 4px;
+  }
+  .foco__idle-icon svg { width: 28px; height: 28px; }
+  .foco__idle-title {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 28px;
+    color: var(--color-text-primary);
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+  .foco__idle-sub {
+    font-size: 14px;
+    color: var(--color-text-secondary);
+    max-width: 38ch;
+    margin: 0;
+  }
+  .foco__idle-cta {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 11px 22px 11px 18px;
+    background: var(--color-accent);
+    color: #fff;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    margin-top: 6px;
+    transition: background-color .12s ease;
+  }
+  .foco__idle-cta:hover { background: var(--color-accent-hover); }
+  .foco__idle-cta svg { width: 13px; height: 13px; }
+
+  .foco__duration {
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    margin-top: 2px;
+  }
+  .foco__duration-lbl {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+  }
+  .foco__duration-row {
+    display: flex; gap: 4px;
+    background: var(--color-bg-surface);
+    border: 0.5px solid var(--color-border);
+    border-radius: 999px;
+    padding: 3px;
+  }
+  .foco__duration-chip {
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    font-family: var(--font-mono);
+    transition: background-color .12s ease, color .12s ease;
+  }
+  .foco__duration-chip:hover {
+    color: var(--color-text-primary);
+  }
+  .foco__duration-chip.is-on {
+    background: var(--color-accent);
+    color: #fff;
+  }
+  .foco__duration-chip.is-free {
+    font-family: var(--font-sans);
+    font-style: italic;
+  }
+  .foco__duration-custom {
+    width: 70px;
+    background: transparent;
+    border: 0;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    text-align: center;
+    transition: background-color .12s ease, color .12s ease;
+  }
+  .foco__duration-custom:focus {
+    outline: none;
+    background: var(--color-accent);
+    color: #fff;
+  }
+  .foco__duration-custom::placeholder { color: var(--color-text-secondary); opacity: 0.6; }
+
+  .foco__timer.is-free {
+    font-size: 84px;  /* HH:MM:SS may show; keep within ring */
+  }
+  .foco__free-badge {
+    position: absolute;
+    top: 14px; left: 50%;
+    transform: translateX(-50%);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    background: var(--color-accent-bg);
+    padding: 3px 10px;
+    border-radius: 999px;
+  }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(30,28,26,0.22);
+    z-index: 110;
+    display: grid; place-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s ease;
+    padding: 32px;
+  }
+  .modal-overlay.is-open { opacity: 1; pointer-events: auto; }
+  .modal {
+    background: var(--color-bg-surface);
+    border-radius: 14px;
+    border: 0.5px solid var(--color-border);
+    width: 440px;
+    max-width: 100%;
+    max-height: 80vh;
+    overflow: hidden;
+    display: flex; flex-direction: column;
+    box-shadow: 0 24px 60px rgba(30,28,26,0.22);
+    transform: translateY(10px) scale(0.985);
+    transition: transform .22s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  .modal-overlay.is-open .modal { transform: translateY(0) scale(1); }
+  .modal__head {
+    padding: 16px 18px 14px 20px;
+    border-bottom: 0.5px solid var(--color-border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .modal__title {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 18px;
+    letter-spacing: -0.005em;
+    color: var(--color-text-primary);
+  }
+  .modal__close {
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    color: var(--color-text-secondary);
+    display: grid; place-items: center;
+    transition: background-color .12s ease, color .12s ease;
+  }
+  .modal__close:hover { background: var(--color-bg-base); color: var(--color-text-primary); }
+  .modal__close svg { width: 14px; height: 14px; }
+  .modal__list {
+    padding: 8px;
+    overflow-y: auto;
+    display: flex; flex-direction: column; gap: 2px;
+  }
+  .modal__item {
+    display: flex; align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 12px;
+    border-radius: 8px;
+    text-align: left;
+    transition: background-color .12s ease;
+    width: 100%;
+  }
+  .modal__item:hover { background: var(--color-bg-base); }
+  .modal__item-main { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .modal__item-title { font-size: 13.5px; color: var(--color-text-primary); line-height: 1.35; }
+  .modal__item-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .modal__item-arrow {
+    color: var(--color-text-secondary);
+    font-size: 16px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .modal__empty {
+    padding: 32px 16px;
+    text-align: center;
+    color: var(--color-text-secondary);
+    font-size: 13px;
+  }
+
+  /* History footer */
+  .foco__history {
+    border-top: 0.5px solid var(--color-border);
+    background: var(--color-bg-surface);
+    padding: 14px 24px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 20px;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .foco__history-label {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+    flex-shrink: 0;
+  }
+  .foco__history-list {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    padding-bottom: 2px;
+    min-width: 0;
+  }
+  .foco__history-list::-webkit-scrollbar { height: 4px; }
+  .foco__history-list::-webkit-scrollbar-thumb {
+    background: var(--color-border); border-radius: 999px;
+  }
+  .foco__history-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 12px;
+    background: var(--color-bg-base);
+    border-radius: 8px;
+    flex-shrink: 0;
+    min-width: 0;
+  }
+  .foco__history-item-title {
+    font-size: 12px;
+    color: var(--color-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 220px;
+  }
+  .foco__history-item-dur {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--color-accent);
+    font-weight: 500;
+  }
+  .foco__history-item-time {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--color-text-secondary);
+  }
+  .foco__history-total {
+    display: flex; flex-direction: column; gap: 1px;
+    align-items: flex-end;
+    flex-shrink: 0;
+    padding-left: 12px;
+    border-left: 0.5px solid var(--color-border);
+  }
+  .foco__history-total-lbl {
+    font-size: 10px;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+  }
+  .foco__history-total-val {
+    font-family: var(--font-mono);
+    font-size: 20px;
+    color: var(--color-accent);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    line-height: 1.1;
+  }
+
+  @media (max-width: 720px) {
+    .foco__history {
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+    .foco__history-total {
+      border-left: 0;
+      padding-left: 0;
+      align-items: flex-start;
+      flex-direction: row;
+      gap: 12px;
+      align-items: baseline;
+    }
+  }
+
+  /* =========================================================
+     CALENDAR SCREEN
+     ========================================================= */
+  .cal {
+    --hour-h: 52px;
+    --start: 6;
+    --end: 23;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    gap: 16px;
+    animation: fade-in-up .22s ease both;
+  }
+  .cal__head {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px; flex-wrap: wrap;
+  }
+  .cal__head-left { display: flex; align-items: center; gap: 14px; }
+  .cal__nav { display: inline-flex; gap: 2px; }
+  .cal__nav button {
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    color: var(--color-text-secondary);
+    display: grid; place-items: center;
+    transition: background-color .12s ease, color .12s ease;
+    font-size: 16px;
+  }
+  .cal__nav button:hover { background: var(--color-bg-surface); color: var(--color-text-primary); }
+  .cal__range {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 22px;
+    letter-spacing: -0.005em;
+    color: var(--color-text-primary);
+  }
+  .cal__today-btn {
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    border: 0.5px solid var(--color-border);
+    background: var(--color-bg-surface);
+    transition: color .12s ease, border-color .12s ease;
+  }
+  .cal__today-btn:hover { color: var(--color-text-primary); border-color: #c0bdb1; }
+  .cal__cta {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 9px 16px 9px 12px;
+    background: var(--color-accent); color: #fff;
+    border-radius: 999px;
+    font-size: 13px; font-weight: 500;
+    transition: background-color .12s ease;
+  }
+  .cal__cta:hover { background: var(--color-accent-hover); }
+  .cal__cta svg { width: 14px; height: 14px; }
+
+  .cal__grid-wrap {
+    flex: 1;
+    background: var(--color-bg-surface);
+    border: 0.5px solid var(--color-border);
+    border-radius: 12px;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+    min-height: 0;
+  }
+  .cal__head-row {
+    display: grid;
+    grid-template-columns: 56px repeat(7, minmax(0, 1fr));
+    border-bottom: 0.5px solid var(--color-border);
+    flex-shrink: 0;
+  }
+  .cal__corner { background: var(--color-bg-surface); }
+  .cal__day-head {
+    padding: 12px 8px 10px;
+    border-left: 0.5px solid var(--color-border);
+    display: flex; flex-direction: column; gap: 2px;
+    align-items: center;
+  }
+  .cal__day-head .wd {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+  }
+  .cal__day-head .num {
+    font-family: var(--font-display);
+    font-size: 19px;
+    line-height: 1;
+    letter-spacing: -0.005em;
+    color: var(--color-text-primary);
+    font-weight: 400;
+    margin-top: 2px;
+    padding: 0 2px 2px;
+  }
+  .cal__day-head.is-today .wd { color: var(--color-accent); }
+  .cal__day-head.is-today .num {
+    color: var(--color-accent);
+    border-bottom: 2px solid var(--color-accent);
+  }
+  .cal__body {
+    flex: 1;
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: 56px repeat(7, minmax(0, 1fr));
+    position: relative;
+  }
+  .cal__hours-col {
+    position: relative;
+    height: calc((var(--end) - var(--start) + 1) * var(--hour-h));
+    border-right: 0.5px solid var(--color-border);
+  }
+  .cal__hour {
+    position: absolute;
+    left: 0; right: 8px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--color-text-secondary);
+    text-align: right;
+    transform: translateY(-6px);
+  }
+  .cal__day-col {
+    position: relative;
+    height: calc((var(--end) - var(--start) + 1) * var(--hour-h));
+    border-left: 0.5px solid var(--color-border);
+  }
+  .cal__day-col.is-today {
+    background: linear-gradient(180deg, rgba(250,236,231,0.32), rgba(250,236,231,0));
+  }
+  .cal__gridline {
+    position: absolute;
+    left: 0; right: 0;
+    height: 0;
+    border-top: 0.5px dashed #E5E3DA;
+    pointer-events: none;
+  }
+
+  .cblock {
+    position: absolute;
+    left: 4px; right: 4px;
+    border-radius: 6px;
+    padding: 5px 7px;
+    overflow: hidden;
+    cursor: pointer;
+    display: flex; flex-direction: column; gap: 1px;
+    transition: filter .14s ease, transform .14s ease, box-shadow .14s ease;
+  }
+  .cblock:hover {
+    filter: brightness(0.97);
+    transform: translateX(1px);
+    box-shadow: 0 2px 8px rgba(30,28,26,0.07);
+    z-index: 4;
+  }
+  .cblock--trabalho {
+    background: #FAECE7;
+    border-left: 2px solid var(--color-accent);
+  }
+  .cblock--estudo {
+    background: var(--color-bg-base);
+    border-left: 2px solid #888780;
+  }
+  .cblock--pessoal {
+    background: var(--color-bg-surface);
+    border: 0.5px solid var(--color-border);
+  }
+  .cblock__title {
+    font-size: 11.5px;
+    font-weight: 500;
+    line-height: 1.25;
+    color: var(--color-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .cblock--trabalho .cblock__title { color: #6b2d10; }
+  .cblock--estudo   .cblock__title { color: #3e4a3a; }
+  .cblock__time {
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    color: var(--color-text-secondary);
+  }
+  .cblock--trabalho .cblock__time { color: var(--color-accent); }
+  .cblock--estudo   .cblock__time { color: #5b6356; }
+
+  .cal__now {
+    position: absolute;
+    left: 0; right: 0;
+    height: 1px;
+    background: var(--color-accent);
+    z-index: 6;
+    pointer-events: none;
+  }
+  .cal__now::before {
+    content: "";
+    position: absolute;
+    left: -3px; top: -3px;
+    width: 7px; height: 7px;
+    background: var(--color-accent);
+    border-radius: 50%;
+  }
+  .cal__now-label {
+    position: absolute;
+    left: -50px; top: -7px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--color-accent);
+    background: var(--color-bg-surface);
+    padding: 0 4px;
+    border-radius: 3px;
+  }
+
+  /* Calendar form (modal body) */
+  .cal__form { padding: 16px 18px 4px; display: flex; flex-direction: column; gap: 14px; }
+  .cal__cat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .cal__cat {
+    padding: 12px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-align: center;
+    border: 0.5px solid transparent;
+    transition: box-shadow .12s ease, transform .12s ease;
+  }
+  .cal__cat:hover { transform: translateY(-1px); }
+  .cal__cat--trabalho { background: #FAECE7; color: var(--color-accent); border-left: 2px solid var(--color-accent); }
+  .cal__cat--estudo   { background: var(--color-bg-base); color: #5b6356; border-left: 2px solid #888780; }
+  .cal__cat--pessoal  { background: var(--color-bg-surface); color: var(--color-text-primary); border: 0.5px solid var(--color-border); }
+  .cal__cat.is-on { box-shadow: 0 0 0 2px var(--color-bg-surface), 0 0 0 4px var(--color-accent); }
+
+  .cal__foot {
+    display: flex; justify-content: flex-end; gap: 8px;
+    padding: 14px 18px; border-top: 0.5px solid var(--color-border);
+    margin-top: 8px;
+  }
+  .cal__btn {
+    padding: 9px 18px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    transition: background-color .12s ease, color .12s ease, border-color .12s ease;
+  }
+  .cal__btn--ghost {
+    background: transparent;
+    color: var(--color-text-secondary);
+    border: 0.5px solid var(--color-border);
+  }
+  .cal__btn--ghost:hover { color: var(--color-text-primary); border-color: #c0bdb1; }
+  .cal__btn--primary { background: var(--color-accent); color: #fff; }
+  .cal__btn--primary:hover { background: var(--color-accent-hover); }
+
+  @media (max-width: 880px) {
+    .cal__day-head .wd { font-size: 9px; }
+    .cal__day-head .num { font-size: 16px; }
+  }
+
+  /* ---- Minimal Tweaks panel ---- */
+  .twp {
+    position: fixed; right: 16px; bottom: 16px; z-index: 100;
+    width: 268px;
+    background: rgba(250,249,247,0.92);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    backdrop-filter: blur(20px) saturate(160%);
+    border: 0.5px solid rgba(255,255,255,0.6);
+    border-radius: 14px;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.5) inset, 0 12px 32px rgba(30,28,26,0.18);
+    color: var(--color-text-primary);
+    font-size: 12px;
+  }
+  .twp__hd {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 8px 10px 14px;
+    border-bottom: 0.5px solid rgba(0,0,0,0.06);
+  }
+  .twp__hd strong { font-weight: 500; font-size: 12px; letter-spacing: 0.01em; }
+  .twp__hd button {
+    width: 22px; height: 22px; border-radius: 6px;
+    color: var(--color-text-secondary); font-size: 14px; line-height: 1;
+  }
+  .twp__hd button:hover { background: rgba(0,0,0,0.06); color: var(--color-text-primary); }
+  .twp__body { padding: 10px 14px 14px; display: flex; flex-direction: column; gap: 10px; }
+  .twp__sect {
+    font-size: 10px; font-weight: 500; letter-spacing: 0.07em;
+    text-transform: uppercase; color: var(--color-text-secondary);
+    margin: 4px 0 -2px;
+  }
+  .twp__row { display: flex; flex-direction: column; gap: 6px; }
+  .twp__row-h { flex-direction: row; align-items: center; justify-content: space-between; }
+  .twp__lbl { color: var(--color-text-secondary); }
+  .twp__sw {
+    width: 32px; height: 18px; border-radius: 999px; background: #c9c6bc;
+    position: relative; transition: background-color .15s ease;
+  }
+  .twp__sw i {
+    position: absolute; top: 2px; left: 2px; width: 14px; height: 14px;
+    background: #fff; border-radius: 50%; transition: left .15s ease;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+  }
+  .twp__sw.is-on { background: var(--color-accent); }
+  .twp__sw.is-on i { left: 16px; }
+  .twp__seg {
+    display: flex; gap: 0; background: rgba(0,0,0,0.05);
+    border-radius: 8px; padding: 2px;
+  }
+  .twp__seg button {
+    flex: 1; padding: 5px 8px; border-radius: 6px;
+    font-size: 11px; color: var(--color-text-secondary);
+    text-transform: capitalize;
+  }
+  .twp__seg button.is-on {
+    background: var(--color-bg-surface); color: var(--color-text-primary);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+  }
+  .twp__chips { display: flex; gap: 6px; }
+  .twp__chip {
+    width: 22px; height: 22px; border-radius: 6px;
+    border: 1px solid rgba(0,0,0,0.08);
+    transition: transform .12s ease, box-shadow .12s ease;
+  }
+  .twp__chip:hover { transform: scale(1.06); }
+  .twp__chip.is-on { box-shadow: 0 0 0 2px var(--color-bg-base), 0 0 0 4px var(--color-text-primary); }
+</style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <!-- Icon library: all line icons drawn fresh, generic UI shapes -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="i-dashboard" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="1.6"
+              stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3.5" y="3.5" width="7" height="9" rx="1.5"/>
+        <rect x="13.5" y="3.5" width="7" height="5" rx="1.5"/>
+        <rect x="3.5" y="15.5" width="7" height="5" rx="1.5"/>
+        <rect x="13.5" y="11.5" width="7" height="9" rx="1.5"/>
+      </symbol>
+
+      <symbol id="i-calendar" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="1.6"
+              stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3.5" y="5" width="17" height="15.5" rx="2"/>
+        <path d="M3.5 9.5h17"/>
+        <path d="M8 3.5v3M16 3.5v3"/>
+      </symbol>
+
+      <symbol id="i-kanban" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="1.6"
+              stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3.5" y="3.5" width="5" height="17" rx="1.5"/>
+        <rect x="9.5" y="3.5" width="5" height="11" rx="1.5"/>
+        <rect x="15.5" y="3.5" width="5" height="14" rx="1.5"/>
+      </symbol>
+
+      <symbol id="i-focus" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="1.6"
+              stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="8.5"/>
+        <path d="M12 7.5V12l3 2"/>
+      </symbol>
+
+      <symbol id="i-finance" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="1.6"
+              stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3.5 17.5l5-5 4 4 8-9"/>
+        <path d="M15 7.5h5.5V13"/>
+      </symbol>
+
+      <symbol id="i-search" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="1.6"
+              stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="6.5"/>
+        <path d="m20 20-4.2-4.2"/>
+      </symbol>
+
+      <symbol id="i-bell" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="1.6"
+              stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 17V11a6 6 0 1112 0v6"/>
+        <path d="M4.5 17h15"/>
+        <path d="M10 20a2 2 0 004 0"/>
+      </symbol>
+
+      <symbol id="i-plus" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 5v14M5 12h14"/>
+      </symbol>
+
+      <symbol id="i-check-square" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="1.6"
+              stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3.5" y="3.5" width="17" height="17" rx="3"/>
+        <path d="m8 12 3 3 5-6"/>
+      </symbol>
+
+      <symbol id="i-hourglass" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="1.6"
+              stroke-linecap="round" stroke-linejoin="round">
+        <path d="M7 4h10M7 20h10"/>
+        <path d="M7 4c0 4 5 5 5 8s-5 4-5 8"/>
+        <path d="M17 4c0 4-5 5-5 8s5 4 5 8"/>
+      </symbol>
+
+      <symbol id="i-bolt" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="1.6"
+              stroke-linecap="round" stroke-linejoin="round">
+        <path d="M13 3 5 14h6l-1 7 8-11h-6z"/>
+      </symbol>
+
+      <symbol id="i-paperclip" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="1.6"
+              stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 12 12.5 19.5a4.5 4.5 0 0 1-6.4-6.4l8.5-8.5a3 3 0 0 1 4.3 4.3L10.5 17.2a1.5 1.5 0 0 1-2.1-2.1l7.4-7.4"/>
+      </symbol>
+
+      <symbol id="i-message" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="1.6"
+              stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 5h16v11H9l-5 4z"/>
+      </symbol>
+
+      <symbol id="i-x" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="1.8"
+              stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 6l12 12M18 6 6 18"/>
+      </symbol>
+
+      <symbol id="i-play" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M7 5.5v13a1 1 0 0 0 1.5.87l11-6.5a1 1 0 0 0 0-1.74l-11-6.5A1 1 0 0 0 7 5.5z"/>
+      </symbol>
+
+      <symbol id="i-pause" viewBox="0 0 24 24" fill="currentColor">
+        <rect x="6.5" y="5" width="3.5" height="14" rx="1"/>
+        <rect x="14" y="5" width="3.5" height="14" rx="1"/>
+      </symbol>
+
+      <symbol id="i-stop" viewBox="0 0 24 24" fill="currentColor">
+        <rect x="6" y="6" width="12" height="12" rx="1.5"/>
+      </symbol>
+
+      <symbol id="i-arrow-out" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="1.6"
+              stroke-linecap="round" stroke-linejoin="round">
+        <path d="M8 16 16 8"/>
+        <path d="M9.5 8H16v6.5"/>
+      </symbol>
+
+      <symbol id="i-clock" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="1.6"
+              stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="8.5"/>
+        <path d="M12 7.5V12l3 2"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+  <script type="text/babel">
+    const { useState, useMemo, useEffect } = React;
+
+    /* ---- Minimal inline Tweaks helpers (no external dep) ---- */
+    function useTweaks(defaults) {
+      const [state, setState] = useState(defaults);
+      const setTweak = (k, v) => {
+        const edits = (typeof k === "object") ? k : { [k]: v };
+        setState((s) => ({ ...s, ...edits }));
+        try { window.parent.postMessage({ type: "__edit_mode_set_keys", edits }, "*"); } catch(e) {}
+      };
+      return [state, setTweak];
+    }
+
+    function TweaksPanel({ title = "Tweaks", children }) {
+      const [open, setOpen] = useState(false);
+      useEffect(() => {
+        const onMsg = (e) => {
+          if (!e.data || typeof e.data !== "object") return;
+          if (e.data.type === "__activate_edit_mode")   setOpen(true);
+          if (e.data.type === "__deactivate_edit_mode") setOpen(false);
+        };
+        window.addEventListener("message", onMsg);
+        try { window.parent.postMessage({ type: "__edit_mode_available" }, "*"); } catch(e) {}
+        return () => window.removeEventListener("message", onMsg);
+      }, []);
+      const close = () => {
+        setOpen(false);
+        try { window.parent.postMessage({ type: "__edit_mode_dismissed" }, "*"); } catch(e) {}
+      };
+      if (!open) return null;
+      return (
+        <div className="twp">
+          <div className="twp__hd">
+            <strong>{title}</strong>
+            <button onClick={close} aria-label="Fechar">×</button>
+          </div>
+          <div className="twp__body">{children}</div>
+        </div>
+      );
+    }
+
+    const TweakSection = ({ label }) => <div className="twp__sect">{label}</div>;
+    const TweakToggle = ({ label, value, onChange }) => (
+      <label className="twp__row twp__row-h">
+        <span>{label}</span>
+        <button
+          className={`twp__sw ${value ? "is-on" : ""}`}
+          onClick={() => onChange(!value)}
+          role="switch" aria-checked={value}
+        ><i /></button>
+      </label>
+    );
+    const TweakRadio = ({ label, value, options, onChange }) => (
+      <div className="twp__row">
+        <span className="twp__lbl">{label}</span>
+        <div className="twp__seg">
+          {options.map((o) => (
+            <button
+              key={o}
+              className={value === o ? "is-on" : ""}
+              onClick={() => onChange(o)}
+            >{o}</button>
+          ))}
+        </div>
+      </div>
+    );
+    const TweakColor = ({ label, value, options, onChange }) => (
+      <div className="twp__row">
+        <span className="twp__lbl">{label}</span>
+        <div className="twp__chips">
+          {options.map((c) => (
+            <button
+              key={c}
+              className={`twp__chip ${value === c ? "is-on" : ""}`}
+              style={{ background: c }}
+              onClick={() => onChange(c)}
+              aria-label={c}
+            />
+          ))}
+        </div>
+      </div>
+    );
+
+    const Icon = ({ id, ...rest }) => (
+      <svg {...rest}><use href={`#i-${id}`} /></svg>
+    );
+
+    const MODULES = [
+      {
+        key: "dashboard",
+        label: "Dashboard",
+        icon: "dashboard",
+        eyebrow: "Visão geral",
+        title: "Seu dia, em uma página",
+        body: "Resumo cruzado dos outros módulos: o que está marcado, o que está em foco, o que precisa de atenção. Esse painel será montado quando os outros estiverem no lugar.",
+        meta: ["Próximo evento", "Tarefa em foco", "Saldo do mês"]
+      },
+      {
+        key: "calendar",
+        label: "Calendário",
+        icon: "calendar",
+        eyebrow: "MVP",
+        title: "Calendário",
+        body: "Agenda semanal e diária com eventos, blocos de tempo e tarefas com hora marcada. Sincronização e arrasto-para-criar virão depois.",
+        meta: ["Visão semana", "Visão dia", "Eventos"]
+      },
+      {
+        key: "kanban",
+        label: "Kanban",
+        icon: "kanban",
+        eyebrow: "MVP",
+        title: "Kanban",
+        body: "Quadro de tarefas em colunas — A fazer, Em andamento, Revisão, Feito. Arrastar entre colunas, etiquetas, prazos.",
+        meta: ["4 colunas", "Etiquetas", "Prazos"]
+      },
+      {
+        key: "focus",
+        label: "Foco",
+        icon: "focus",
+        eyebrow: "MVP",
+        title: "Timer de Foco",
+        body: "Sessões cronometradas com bloco de tempo, anotação rápida e histórico do dia. Pomodoro como variante, não como padrão.",
+        meta: ["Sessão atual", "Histórico", "Estatísticas"]
+      },
+      {
+        key: "finance",
+        label: "Finanças",
+        icon: "finance",
+        eyebrow: "Futuro",
+        title: "Finanças",
+        body: "Acompanhamento de gastos, receitas e contas a pagar. Será detalhado depois que o MVP estiver estável.",
+        meta: ["Carteira", "Transações", "Contas"]
+      }
+    ];
+
+    const dateFormatted = () => {
+      const d = new Date(2026, 4, 8); // Sex, 8 de maio
+      const dias = ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
+      const meses = ["janeiro","fevereiro","março","abril","maio","junho",
+                     "julho","agosto","setembro","outubro","novembro","dezembro"];
+      return `${dias[d.getDay()]}, ${d.getDate()} de ${meses[d.getMonth()]}`;
+    };
+
+    const Sidebar = ({ active, onSelect }) => (
+      <aside className="sidebar" aria-label="Navegação principal">
+        <div className="sidebar__brand" title="LifeOrg">OS</div>
+        <nav className="sidebar__nav">
+          {MODULES.map((m) => (
+            <button
+              key={m.key}
+              className={`nav-btn ${active === m.key ? "is-active" : ""}`}
+              onClick={() => onSelect(m.key)}
+              aria-label={m.label}
+              aria-current={active === m.key ? "page" : undefined}
+            >
+              <Icon id={m.icon} />
+              <span className="tip">{m.label}</span>
+            </button>
+          ))}
+        </nav>
+        <div className="sidebar__foot">
+          <div className="avatar" title="Você">VC</div>
+        </div>
+      </aside>
+    );
+
+    const TopBar = ({ title }) => (
+      <header className="topbar">
+        <div className="topbar__title">{title}</div>
+        <div className="topbar__right">
+          <button className="topbar__icon" aria-label="Buscar">
+            <Icon id="search" width="16" height="16" />
+          </button>
+          <button className="topbar__icon" aria-label="Notificações">
+            <Icon id="bell" width="16" height="16" />
+          </button>
+          <span className="topbar__date">
+            <strong>{dateFormatted()}</strong>
+          </span>
+          <span className="badge-today">
+            <span className="dot" />
+            Hoje
+          </span>
+        </div>
+      </header>
+    );
+
+    /* =========================================================
+       DASHBOARD
+       ========================================================= */
+
+    // "Now" = 12:40 (sex, 8 de maio).
+    const NOW_HOUR = 12;
+    const NOW_MIN = 40;
+    const AGENDA_START = 9;
+    const AGENDA_END = 18;
+    const HOUR_H = 64;
+
+    const fmtHM = (h, m) =>
+      `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+
+    const toY = (h, m) => ((h - AGENDA_START) + m / 60) * HOUR_H;
+
+    const AGENDA = [
+      { t: "Sprint planning",        cat: "trabalho", sH: 9,  sM: 0,  eH: 10, eM: 0  },
+      { t: "Estudo: Sistemas Lineares", cat: "estudo", sH: 10, sM: 0, eH: 11, eM: 30 },
+      { t: "Almoço",                 cat: "pessoal",  sH: 11, sM: 30, eH: 12, eM: 30 },
+      { t: "Deep work — feature foco", cat: "trabalho", sH: 12, sM: 30, eH: 14, eM: 0 },
+      { t: "Revisão de código",      cat: "trabalho", sH: 14, sM: 0,  eH: 15, eM: 0  },
+      { t: "1:1 com mentor",         cat: "pessoal",  sH: 15, sM: 0,  eH: 16, eM: 0  },
+      { t: "Estudo: Automação Discreta", cat: "estudo", sH: 16, sM: 30, eH: 18, eM: 0 }
+    ];
+
+    const KANBAN = [
+      {
+        name: "A fazer", count: 5,
+        cards: [
+          { t: "Atualizar README do projeto", tag: "trabalho", hours: 1.0, meta: { date: "8 mai", attach: 1 } },
+          { t: "Comprar passagem para evento", tag: "pessoal", hours: 0.5, meta: { date: "12 mai" } },
+          { t: "Responder e-mail do cliente",  tag: "trabalho", hours: 0.5, meta: { date: "hoje", msg: 2 } }
+        ]
+      },
+      {
+        name: "Em andamento", count: 2,
+        cards: [
+          { t: "Implementar tela de Foco",  tag: "trabalho", hours: 4.0, active: true, meta: { date: "hoje", attach: 3 } },
+          { t: "Estudar para P2 Sinais",    tag: "estudo",   hours: 6.0, meta: { date: "10 mai" } }
+        ]
+      },
+      {
+        name: "Revisão", count: 2,
+        cards: [
+          { t: "PR #142 — refactor sidebar", tag: "trabalho", hours: 2.0, meta: { date: "ontem", msg: 4 } },
+          { t: "Roteiro do vídeo de demo",   tag: "pessoal",  hours: 2.0, meta: { date: "9 mai" } }
+        ]
+      }
+    ];
+
+    /* ---- Pie chart for time × tag ---- */
+    const TAG_COLORS = {
+      trabalho: "#CC5200",
+      estudo:   "#5B6356",
+      pessoal:  "#B08C5E"
+    };
+    const TAG_LABEL = {
+      trabalho: "Trabalho",
+      estudo:   "Estudo",
+      pessoal:  "Pessoal"
+    };
+
+    const aggregateTagTime = () => {
+      const totals = {};
+      KANBAN.forEach(col => col.cards.forEach(c => {
+        totals[c.tag] = (totals[c.tag] || 0) + (c.hours || 0);
+      }));
+      const order = ["trabalho", "estudo", "pessoal"];
+      const sum = order.reduce((s, k) => s + (totals[k] || 0), 0);
+      return { entries: order.map(k => ({
+        tag: k,
+        hours: totals[k] || 0,
+        pct: sum ? (totals[k] || 0) / sum : 0
+      })), total: sum };
+    };
+
+    const fmtHours = (h) => {
+      const H = Math.floor(h);
+      const M = Math.round((h - H) * 60);
+      if (H && M) return `${H}h ${M}min`;
+      if (H) return `${H}h`;
+      return `${M}min`;
+    };
+
+    const polar = (cx, cy, r, deg) => {
+      const a = (deg - 90) * Math.PI / 180;
+      return [cx + r * Math.cos(a), cy + r * Math.sin(a)];
+    };
+
+    const arcPath = (cx, cy, r, innerR, startDeg, endDeg) => {
+      // close gap if full circle
+      const span = endDeg - startDeg;
+      const eff = span >= 359.999 ? 359.99 : span;
+      const e = startDeg + eff;
+      const [sx, sy] = polar(cx, cy, r, startDeg);
+      const [ex, ey] = polar(cx, cy, r, e);
+      const large = eff > 180 ? 1 : 0;
+      if (innerR <= 0) {
+        return `M ${cx} ${cy} L ${sx} ${sy} A ${r} ${r} 0 ${large} 1 ${ex} ${ey} Z`;
+      }
+      const [isx, isy] = polar(cx, cy, innerR, e);
+      const [iex, iey] = polar(cx, cy, innerR, startDeg);
+      return `M ${sx} ${sy} A ${r} ${r} 0 ${large} 1 ${ex} ${ey} L ${isx} ${isy} A ${innerR} ${innerR} 0 ${large} 0 ${iex} ${iey} Z`;
+    };
+
+    const Pie = ({ data, total, donut, accent }) => {
+      const cx = 90, cy = 90, r = 80;
+      const innerR = donut ? 50 : 0;
+      let acc = 0;
+      const slices = data.map((d) => {
+        const start = acc * 360;
+        acc += d.pct;
+        const end = acc * 360;
+        return { ...d, start, end };
+      });
+      const colorOf = (tag) => tag === "trabalho" ? accent : TAG_COLORS[tag];
+      return (
+        <div className="pie-center">
+          <svg viewBox="0 0 180 180" aria-label="Distribuição de tempo por etiqueta">
+            {slices.map((s) => (
+              s.pct > 0 && (
+                <path
+                  key={s.tag}
+                  className="pie-slice"
+                  d={arcPath(cx, cy, r, innerR, s.start, s.end)}
+                  fill={colorOf(s.tag)}
+                  stroke="#FFFFFF"
+                  strokeWidth="1.5"
+                >
+                  <title>{`${TAG_LABEL[s.tag]} · ${fmtHours(s.hours)} (${Math.round(s.pct*100)}%)`}</title>
+                </path>
+              )
+            ))}
+          </svg>
+          {donut && (
+            <div className="pie-center__inner">
+              <div>
+                <div className="pie-total">{fmtHours(total)}</div>
+                <div className="pie-total-lbl">Total</div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    const Legend = ({ data, accent, showBars }) => (
+      <div className="legend">
+        {data.map((d) => {
+          const color = d.tag === "trabalho" ? accent : TAG_COLORS[d.tag];
+          return (
+            <div className="legend__row" key={d.tag}>
+              <span className="legend__sw" style={{ background: color }} />
+              <span className="legend__name">{TAG_LABEL[d.tag]}</span>
+              <span className="legend__time">{fmtHours(d.hours)}</span>
+              <span className="legend__pct">{Math.round(d.pct * 100)}%</span>
+              {showBars && (
+                <div className="legend__bar">
+                  <span style={{ width: `${d.pct * 100}%`, background: color }} />
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    );
+
+    /* ---- Kanban full screen data ---- */
+    const KANBAN_FULL = [
+      { id: "b1", col: "backlog", title: "Atualizar README do projeto", tag: "trabalho", date: "8 mai", sessions: [] },
+      { id: "b2", col: "backlog", title: "Comprar passagem para evento", tag: "pessoal", date: "12 mai", sessions: [] },
+      { id: "b3", col: "backlog", title: "Estudar para P2 Sinais", tag: "estudo", date: "10 mai", sessions: [{date:"7 mai · ter", dur:"45min"}] },
+      { id: "p1", col: "progress", title: "Implementar tela de Foco", tag: "trabalho", date: "hoje", inFocus: true,
+        description: "Sessões cronometradas com bloco de tempo, anotação rápida e histórico do dia.",
+        sessions: [
+          { date: "8 mai · sex · 10:30", dur: "52min" },
+          { date: "7 mai · qui · 14:00", dur: "1h 12min" },
+          { date: "7 mai · qui · 09:15", dur: "38min" }
+        ] },
+      { id: "p2", col: "progress", title: "Roteiro do vídeo de demo", tag: "pessoal", date: "9 mai",
+        sessions: [{ date: "6 mai · qua", dur: "25min" }] },
+      { id: "p3", col: "progress", title: "Revisão de código — feature foco", tag: "trabalho", date: "hoje",
+        sessions: [{ date: "8 mai · sex", dur: "20min" }] },
+      { id: "d1", col: "done", title: "PR #142 — refactor sidebar", tag: "trabalho", date: "ontem",
+        sessions: [
+          { date: "7 mai · qui", dur: "1h 35min" },
+          { date: "6 mai · qua", dur: "55min" }
+        ] },
+      { id: "d2", col: "done", title: "Configurar deploy de staging", tag: "trabalho", date: "5 mai",
+        sessions: [{ date: "5 mai · seg", dur: "2h 10min" }] }
+    ];
+
+    const COLUMNS = [
+      { key: "backlog",  name: "Backlog" },
+      { key: "progress", name: "Em Progresso" },
+      { key: "done",     name: "Concluído" }
+    ];
+
+    const TAG_FILTERS = ["todos", "trabalho", "estudo", "pessoal"];
+
+    const sumDur = (sessions) => {
+      let total = 0;
+      sessions.forEach(s => {
+        const m = s.dur.match(/(?:(\d+)h\s*)?(?:(\d+)min)?/);
+        if (!m) return;
+        total += (parseInt(m[1] || 0, 10) * 60) + parseInt(m[2] || 0, 10);
+      });
+      return total;
+    };
+    const fmtMin = (mins) => {
+      const h = Math.floor(mins / 60);
+      const m = mins % 60;
+      if (h && m) return `${h}h ${m}min`;
+      if (h) return `${h}h`;
+      return `${m}min`;
+    };
+
+    const KanbanCard = ({ card, onClick, selected }) => (
+      <button
+        className={`kb-card ${card.inFocus ? "is-focus" : ""} ${selected ? "is-selected" : ""}`}
+        onClick={onClick}
+      >
+        <div className="kb-card__title">{card.title}</div>
+        <div className="kb-card__row">
+          <span className={`ktag tag-${card.tag}`}>{card.tag}</span>
+          {card.inFocus && <span className="kb-card__badge">Em foco</span>}
+        </div>
+        <div className="kb-card__row">
+          {card.date && (
+            <span className="kb-card__date">{card.date}</span>
+          )}
+          {card.sessions && card.sessions.length > 0 && (
+            <span className="kb-card__focus">
+              <Icon id="clock" /> {card.sessions.length} {card.sessions.length === 1 ? "sessão" : "sessões"}
+            </span>
+          )}
+        </div>
+      </button>
+    );
+
+    const Drawer = ({ card, onClose, onChange, onStartFocus }) => {
+      const total = card ? sumDur(card.sessions || []) : 0;
+      return (
+        <React.Fragment>
+          <div
+            className={`drawer-overlay ${card ? "is-open" : ""}`}
+            onClick={onClose}
+          />
+          <aside className={`drawer ${card ? "is-open" : ""}`} aria-hidden={!card}>
+            {card && (
+              <React.Fragment>
+                <div className="drawer__head">
+                  <span className="eyebrow">Card · {COLUMNS.find(c => c.key === card.col).name}</span>
+                  <button className="drawer__close" onClick={onClose} aria-label="Fechar">
+                    <Icon id="x" />
+                  </button>
+                </div>
+                <div className="drawer__body">
+                  <input
+                    className="drawer__title"
+                    value={card.title}
+                    onChange={(e) => onChange({ title: e.target.value })}
+                  />
+                  <div className="field">
+                    <label className="field__lbl">Descrição</label>
+                    <textarea
+                      className="field__textarea"
+                      placeholder="Adicionar descrição…"
+                      value={card.description || ""}
+                      onChange={(e) => onChange({ description: e.target.value })}
+                    />
+                  </div>
+                  <div className="field-row">
+                    <div className="field">
+                      <label className="field__lbl">Coluna</label>
+                      <select
+                        className="field__select"
+                        value={card.col}
+                        onChange={(e) => onChange({ col: e.target.value })}
+                      >
+                        {COLUMNS.map(c => <option key={c.key} value={c.key}>{c.name}</option>)}
+                      </select>
+                    </div>
+                    <div className="field">
+                      <label className="field__lbl">Data</label>
+                      <input
+                        className="field__input"
+                        value={card.date || ""}
+                        placeholder="—"
+                        onChange={(e) => onChange({ date: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                  <div className="field">
+                    <label className="field__lbl">Etiqueta</label>
+                    <select
+                      className="field__select"
+                      value={card.tag}
+                      onChange={(e) => onChange({ tag: e.target.value })}
+                    >
+                      <option value="trabalho">Trabalho</option>
+                      <option value="estudo">Estudo</option>
+                      <option value="pessoal">Pessoal</option>
+                    </select>
+                  </div>
+                  <div className="field">
+                    <label className="field__lbl">
+                      Histórico de sessões {card.sessions?.length ? `· ${card.sessions.length}` : ""}
+                    </label>
+                    <div className="sessions">
+                      {(card.sessions || []).length === 0 && (
+                        <div style={{ color: "var(--color-text-secondary)", fontSize: 12, padding: "10px 0" }}>
+                          Nenhuma sessão registrada ainda.
+                        </div>
+                      )}
+                      {(card.sessions || []).map((s, i) => (
+                        <div className="session" key={i}>
+                          <div className="session__date">
+                            <strong>{s.date.split(" · ")[0]}</strong>
+                            <span>{s.date.split(" · ").slice(1).join(" · ")}</span>
+                          </div>
+                          <div className="session__dur">{s.dur}</div>
+                        </div>
+                      ))}
+                      {(card.sessions || []).length > 0 && (
+                        <div className="sessions__sum">
+                          <span>Total acumulado</span>
+                          <strong>{fmtMin(total)}</strong>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <div className="drawer__foot">
+                  <button className="drawer__cta" onClick={onStartFocus}>
+                    <Icon id="play" />
+                    Iniciar Foco
+                  </button>
+                </div>
+              </React.Fragment>
+            )}
+          </aside>
+        </React.Fragment>
+      );
+    };
+
+    const KanbanScreen = () => {
+      const [cards, setCards] = useState(KANBAN_FULL);
+      const [selectedId, setSelectedId] = useState(null);
+      const [filter, setFilter] = useState("todos");
+      const visible = cards.filter(c => filter === "todos" || c.tag === filter);
+      const selected = cards.find(c => c.id === selectedId);
+
+      const updateCard = (patch) => {
+        setCards(cs => cs.map(c => c.id === selectedId ? { ...c, ...patch } : c));
+      };
+
+      return (
+        <div className="kb">
+          <div className="kb__head">
+            <div className="kb__title">
+              <span>Kanban</span>
+              <span className="kb__count">{cards.length} cards</span>
+            </div>
+            <div className="kb__filters">
+              {TAG_FILTERS.map(f => (
+                <button
+                  key={f}
+                  className={`filter-pill ${filter === f ? "is-on" : ""}`}
+                  onClick={() => setFilter(f)}
+                >{f}</button>
+              ))}
+            </div>
+            <button className="kb__cta">
+              <Icon id="plus" /> Novo Card
+            </button>
+          </div>
+
+          <div className="kb__board">
+            {COLUMNS.map(col => {
+              const colCards = visible.filter(c => c.col === col.key);
+              return (
+                <div
+                  key={col.key}
+                  className={`kbcol ${col.key === "progress" ? "kbcol--progress" : ""}`}
+                >
+                  <div className="kbcol__head">
+                    <div className="kbcol__name">{col.name}</div>
+                    <div className="kbcol__count">{colCards.length}</div>
+                  </div>
+                  <div className="kbcol__cards">
+                    {colCards.map(c => (
+                      <KanbanCard
+                        key={c.id}
+                        card={c}
+                        onClick={() => setSelectedId(c.id)}
+                        selected={selectedId === c.id}
+                      />
+                    ))}
+                  </div>
+                  <button className="kbcol__add">
+                    <Icon id="plus" width="12" height="12" /> Adicionar
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+
+          <Drawer
+            card={selected}
+            onClose={() => setSelectedId(null)}
+            onChange={updateCard}
+            onStartFocus={() => alert(`Iniciando foco em: ${selected.title}`)}
+          />
+        </div>
+      );
+    };
+
+    /* =========================================================
+       FOCUS SCREEN
+       ========================================================= */
+
+    const TAG_LABEL_PT = { trabalho: "Trabalho", estudo: "Estudo", pessoal: "Pessoal" };
+
+    // Today's logged focus sessions (rendered in footer + summed for total)
+    const TODAY_SESSIONS_INIT = [
+      { taskId: "p1", title: "Implementar tela de Foco",       seconds: 52*60, time: "10:30" },
+      { taskId: "p1", title: "Implementar tela de Foco",       seconds: 38*60, time: "09:15" },
+      { taskId: "p3", title: "Revisão de código — feature foco", seconds: 64*60, time: "08:10" }
+    ];
+
+    const fmtTimer = (sec) => {
+      sec = Math.max(0, Math.floor(sec));
+      const h = Math.floor(sec / 3600);
+      const m = Math.floor((sec % 3600) / 60);
+      const s = sec % 60;
+      const pad = (n) => String(n).padStart(2, "0");
+      return h > 0 ? `${pad(h)}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
+    };
+    const fmtDur = (sec) => {
+      const h = Math.floor(sec / 3600);
+      const m = Math.floor((sec % 3600) / 60);
+      if (h && m) return `${h}h ${m}min`;
+      if (h) return `${h}h`;
+      return `${m}min`;
+    };
+
+    const FocusModal = ({ open, cards, onPick, onClose }) => (
+      <div className={`modal-overlay ${open ? "is-open" : ""}`} onClick={onClose}>
+        <div className="modal" onClick={(e) => e.stopPropagation()}>
+          <div className="modal__head">
+            <div className="modal__title">Selecionar tarefa</div>
+            <button className="modal__close" onClick={onClose} aria-label="Fechar">
+              <Icon id="x" />
+            </button>
+          </div>
+          <div className="modal__list">
+            {cards.length === 0 && (
+              <div className="modal__empty">
+                Nenhum card em progresso no momento.
+              </div>
+            )}
+            {cards.map(c => (
+              <button key={c.id} className="modal__item" onClick={() => onPick(c)}>
+                <div className="modal__item-main">
+                  <div className="modal__item-title">{c.title}</div>
+                  <div className="modal__item-meta">
+                    <span className={`ktag tag-${c.tag}`}>{c.tag}</span>
+                    {c.date && <span className="kb-card__date">{c.date}</span>}
+                    {c.sessions && c.sessions.length > 0 && (
+                      <span className="kb-card__focus">
+                        <Icon id="clock" /> {c.sessions.length} {c.sessions.length === 1 ? "sessão" : "sessões"}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <span className="modal__item-arrow">→</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+
+    const FocusRing = ({ progress }) => {
+      const size = 340, stroke = 3, r = (size - stroke) / 2;
+      const C = 2 * Math.PI * r;
+      const offset = C * (1 - progress);
+      return (
+        <svg className="foco__ring" viewBox={`0 0 ${size} ${size}`}>
+          <circle className="foco__ring-bg" cx={size/2} cy={size/2} r={r} />
+          <circle
+            className="foco__ring-fg"
+            cx={size/2} cy={size/2} r={r}
+            strokeDasharray={C}
+            strokeDashoffset={offset}
+          />
+        </svg>
+      );
+    };
+
+    const DURATION_OPTIONS = [
+      { key: "15",   label: "15min", seconds: 15 * 60 },
+      { key: "25",   label: "25min", seconds: 25 * 60 },
+      { key: "45",   label: "45min", seconds: 45 * 60 },
+      { key: "60",   label: "60min", seconds: 60 * 60 },
+      { key: "free", label: "Livre", seconds: null }
+    ];
+    const DEFAULT_DURATION_KEY = "25";
+
+    const FocusScreen = ({ goToKanban }) => {
+      const [activeId, setActiveId] = useState(null);
+      const [durKey, setDurKey] = useState(DEFAULT_DURATION_KEY);
+      const [customMin, setCustomMin] = useState("");      // user-typed custom minutes
+      const [duration, setDuration] = useState(25 * 60);   // seconds, or null for free
+      const [elapsed, setElapsed] = useState(0);           // always counts up
+      const [running, setRunning] = useState(false);
+      const [pickerOpen, setPickerOpen] = useState(false);
+      const [sessions, setSessions] = useState(TODAY_SESSIONS_INIT);
+
+      const allCards = KANBAN_FULL;
+      const inProgress = allCards.filter(c => c.col === "progress");
+      const active = allCards.find(c => c.id === activeId);
+      const isFree = duration === null;
+      const remaining = isFree ? elapsed : Math.max(0, duration - elapsed);
+
+      // Resolve the currently selected duration into seconds (or null for free).
+      const resolveSelected = () => {
+        if (durKey === "custom") {
+          const n = parseInt(customMin, 10);
+          return n > 0 ? n * 60 : 25 * 60;
+        }
+        const opt = DURATION_OPTIONS.find(d => d.key === durKey);
+        return opt ? opt.seconds : 25 * 60;
+      };
+
+      // Tick every second when running.
+      useEffect(() => {
+        if (!running) return;
+        const t = setInterval(() => {
+          setElapsed(e => {
+            const next = e + 1;
+            // Auto-complete when duration reached (fixed mode only)
+            if (duration !== null && next >= duration) {
+              clearInterval(t);
+              setRunning(false);
+              if (active) {
+                const now = new Date();
+                setSessions(s => [{
+                  taskId: active.id,
+                  title: active.title,
+                  seconds: duration,
+                  time: `${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`
+                }, ...s]);
+              }
+              return duration;
+            }
+            return next;
+          });
+        }, 1000);
+        return () => clearInterval(t);
+      }, [running, active, duration]);
+
+      const start = (card) => {
+        const sec = resolveSelected();
+        setActiveId(card.id);
+        setDuration(sec);
+        setElapsed(0);
+        setRunning(true);
+        setPickerOpen(false);
+      };
+
+      const togglePause = () => setRunning(r => !r);
+
+      const stopSession = () => {
+        if (active && elapsed >= 30) {
+          const now = new Date();
+          setSessions(s => [{
+            taskId: active.id,
+            title: active.title,
+            seconds: elapsed,
+            time: `${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`
+          }, ...s]);
+        }
+        setRunning(false);
+        setActiveId(null);
+        setElapsed(0);
+      };
+
+      const progress = (duration !== null && duration > 0) ? Math.min(1, elapsed / duration) : 0;
+      const totalToday = sessions.reduce((s, x) => s + x.seconds, 0);
+
+      return (
+        <div className="foco">
+          <div className="foco__stage">
+            {!active && (
+              <React.Fragment>
+                <div className="foco__idle-icon">
+                  <Icon id="focus" />
+                </div>
+                <h1 className="foco__idle-title">Nenhuma tarefa em foco</h1>
+                <p className="foco__idle-sub">
+                  Selecione um card do Kanban para começar uma sessão de foco cronometrada.
+                </p>
+                <button className="foco__idle-cta" onClick={() => setPickerOpen(true)}>
+                  <Icon id="play" />
+                  Selecionar Tarefa
+                </button>
+
+                <div className="foco__duration">
+                  <span className="foco__duration-lbl">Duração da sessão</span>
+                  <div className="foco__duration-row">
+                    {DURATION_OPTIONS.map(opt => (
+                      <button
+                        key={opt.key}
+                        className={`foco__duration-chip ${durKey === opt.key ? "is-on" : ""} ${opt.key === "free" ? "is-free" : ""}`}
+                        onClick={() => setDurKey(opt.key)}
+                      >{opt.label}</button>
+                    ))}
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      className={`foco__duration-custom ${durKey === "custom" ? "is-on" : ""}`}
+                      placeholder="custom"
+                      value={customMin}
+                      onFocus={() => setDurKey("custom")}
+                      onChange={(e) => setCustomMin(e.target.value.replace(/[^\d]/g, "").slice(0, 3))}
+                    />
+                  </div>
+                </div>
+              </React.Fragment>
+            )}
+
+            {active && (
+              <React.Fragment>
+                <div className="foco__task">
+                  <div className="foco__eyebrow">Em foco</div>
+                  <h1 className="foco__task-name">{active.title}</h1>
+                  <div className="foco__task-tag">
+                    <span className="dot" />
+                    {TAG_LABEL_PT[active.tag] || active.tag}
+                  </div>
+                </div>
+
+                <div className="foco__ring-wrap">
+                  <FocusRing progress={progress} />
+                  {isFree && <span className="foco__free-badge">● Cronômetro livre</span>}
+                  <div className={`foco__timer ${!running ? "is-paused" : ""} ${isFree ? "is-free" : ""}`}>
+                    {fmtTimer(remaining)}
+                  </div>
+                </div>
+
+                <div className="foco__controls">
+                  <button className="foco__ctrl" onClick={togglePause}>
+                    {running ? <Icon id="pause" /> : <Icon id="play" />}
+                    {running ? "Pausar" : "Retomar"}
+                  </button>
+                  <button className="foco__ctrl" onClick={stopSession}>
+                    <Icon id="stop" /> Encerrar
+                  </button>
+                  <button className="foco__ctrl" onClick={goToKanban}>
+                    <Icon id="arrow-out" /> Ver Card
+                  </button>
+                </div>
+              </React.Fragment>
+            )}
+          </div>
+
+          <div className="foco__history">
+            <div className="foco__history-label">Histórico hoje</div>
+            <div className="foco__history-list">
+              {sessions.length === 0 && (
+                <span style={{ fontSize: 12, color: "var(--color-text-secondary)" }}>
+                  Nenhuma sessão registrada ainda.
+                </span>
+              )}
+              {sessions.map((s, i) => (
+                <div className="foco__history-item" key={i}>
+                  <span className="foco__history-item-title">{s.title}</span>
+                  <span className="foco__history-item-dur">{fmtDur(s.seconds)}</span>
+                  <span className="foco__history-item-time">{s.time}</span>
+                </div>
+              ))}
+            </div>
+            <div className="foco__history-total">
+              <span className="foco__history-total-lbl">Total hoje</span>
+              <span className="foco__history-total-val">{fmtDur(totalToday)}</span>
+            </div>
+          </div>
+
+          <FocusModal
+            open={pickerOpen}
+            cards={inProgress}
+            onPick={start}
+            onClose={() => setPickerOpen(false)}
+          />
+        </div>
+      );
+    };
+
+    /* =========================================================
+       CALENDAR SCREEN
+       ========================================================= */
+
+    const CAL_START = 6;
+    const CAL_END = 23;            // 06:00 — 23:00 (last hour label)
+    const CAL_HOUR_H = 52;
+    const calY = (h, m) => ((h - CAL_START) + m / 60) * CAL_HOUR_H;
+
+    const WEEKDAYS_PT = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
+    const WEEK_DAYS = [
+      { wd: "Seg", num: 4 },
+      { wd: "Ter", num: 5 },
+      { wd: "Qua", num: 6 },
+      { wd: "Qui", num: 7 },
+      { wd: "Sex", num: 8, isToday: true },
+      { wd: "Sáb", num: 9 },
+      { wd: "Dom", num: 10 }
+    ];
+
+    const CAL_CATS = [
+      { key: "trabalho", label: "Trabalho" },
+      { key: "estudo",   label: "Estudo" },
+      { key: "pessoal",  label: "Pessoal" }
+    ];
+
+    // Realistic week. Coordinate: { day: 0..6, sH, sM, eH, eM, t, cat }
+    const WEEK_BLOCKS = [
+      // Mon
+      { day: 0, sH: 6, sM: 30, eH: 7, eM: 30, t: "Academia",                cat: "pessoal" },
+      { day: 0, sH: 9, sM: 0,  eH: 12, eM: 0, t: "Trabalho — deep work",    cat: "trabalho" },
+      { day: 0, sH: 13, sM: 30, eH: 15, eM: 30, t: "Aula: Sistemas Lineares", cat: "estudo" },
+      { day: 0, sH: 19, sM: 0, eH: 20, eM: 30, t: "Estudo: Inglês",          cat: "estudo" },
+      // Tue
+      { day: 1, sH: 6, sM: 30, eH: 7, eM: 30,  t: "Academia",                cat: "pessoal" },
+      { day: 1, sH: 9, sM: 0,  eH: 12, eM: 30, t: "Trabalho",                cat: "trabalho" },
+      { day: 1, sH: 14, sM: 0, eH: 16, eM: 0,  t: "Aula: Cálculo III",       cat: "estudo" },
+      { day: 1, sH: 20, sM: 0, eH: 21, eM: 30, t: "Estudo: lista de Cálculo", cat: "estudo" },
+      // Wed
+      { day: 2, sH: 7, sM: 0,  eH: 8, eM: 0,   t: "Corrida no parque",       cat: "pessoal" },
+      { day: 2, sH: 10, sM: 0, eH: 12, eM: 30, t: "Trabalho",                cat: "trabalho" },
+      { day: 2, sH: 13, sM: 30, eH: 15, eM: 30, t: "Aula: Sistemas Lineares", cat: "estudo" },
+      { day: 2, sH: 16, sM: 0, eH: 18, eM: 0,  t: "Code review semanal",     cat: "trabalho" },
+      { day: 2, sH: 20, sM: 0, eH: 21, eM: 0,  t: "Estudo: Inglês",          cat: "estudo" },
+      // Thu
+      { day: 3, sH: 6, sM: 30, eH: 7, eM: 30,  t: "Academia",                cat: "pessoal" },
+      { day: 3, sH: 9, sM: 0,  eH: 13, eM: 0,  t: "Trabalho",                cat: "trabalho" },
+      { day: 3, sH: 14, sM: 0, eH: 16, eM: 0,  t: "Aula: Cálculo III",       cat: "estudo" },
+      { day: 3, sH: 19, sM: 0, eH: 21, eM: 0,  t: "Estudo P2 — Sinais",      cat: "estudo" },
+      // Fri (today)
+      { day: 4, sH: 9, sM: 0,  eH: 10, eM: 0,  t: "Sprint planning",         cat: "trabalho" },
+      { day: 4, sH: 10, sM: 0, eH: 11, eM: 30, t: "Estudo: Sistemas",        cat: "estudo" },
+      { day: 4, sH: 12, sM: 30, eH: 14, eM: 0, t: "Deep work — feature foco", cat: "trabalho" },
+      { day: 4, sH: 14, sM: 0, eH: 15, eM: 0,  t: "Revisão de código",       cat: "trabalho" },
+      { day: 4, sH: 15, sM: 0, eH: 16, eM: 0,  t: "1:1 com mentor",          cat: "pessoal" },
+      { day: 4, sH: 16, sM: 30, eH: 18, eM: 0, t: "Estudo: Automação Discreta", cat: "estudo" },
+      // Sat
+      { day: 5, sH: 9, sM: 0,  eH: 10, eM: 30, t: "Academia",                cat: "pessoal" },
+      { day: 5, sH: 11, sM: 0, eH: 13, eM: 0,  t: "Estudo: resumos da semana", cat: "estudo" },
+      { day: 5, sH: 17, sM: 0, eH: 18, eM: 30, t: "Padel com amigos",        cat: "pessoal" },
+      // Sun
+      { day: 6, sH: 10, sM: 0, eH: 12, eM: 0,  t: "Brunch em família",       cat: "pessoal" },
+      { day: 6, sH: 19, sM: 0, eH: 20, eM: 0,  t: "Planejamento da semana",  cat: "pessoal" }
+    ];
+
+    const fmtBlockDur = (sH, sM, eH, eM) => {
+      const mins = (eH * 60 + eM) - (sH * 60 + sM);
+      const h = Math.floor(mins / 60), m = mins % 60;
+      if (h && m) return `${h}h ${m}min`;
+      if (h) return `${h}h`;
+      return `${m}min`;
+    };
+
+    const CalBlock = ({ b }) => {
+      const top = calY(b.sH, b.sM);
+      const height = calY(b.eH, b.eM) - top - 2;
+      const cat = CAL_CATS.find(c => c.key === b.cat);
+      const tooltip = `${b.t}\n${cat ? cat.label : b.cat} · ${fmtBlockDur(b.sH, b.sM, b.eH, b.eM)}`;
+      return (
+        <div
+          className={`cblock cblock--${b.cat}`}
+          style={{ top, height: Math.max(height, 18) }}
+          title={tooltip}
+        >
+          <div className="cblock__title">{b.t}</div>
+          {height >= 28 && (
+            <div className="cblock__time">
+              {fmtHM(b.sH, b.sM)} – {fmtHM(b.eH, b.eM)}
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    const NewBlockModal = ({ open, onClose, onSave, defaultDate }) => {
+      const [title, setTitle] = useState("");
+      const [cat, setCat] = useState("trabalho");
+      const [date, setDate] = useState(defaultDate || "2026-05-08");
+      const [start, setStart] = useState("09:00");
+      const [end, setEnd] = useState("10:00");
+      const [recur, setRecur] = useState("once");
+
+      // Reset when reopened.
+      useEffect(() => {
+        if (open) {
+          setTitle("");
+          setCat("trabalho");
+          setDate(defaultDate || "2026-05-08");
+          setStart("09:00");
+          setEnd("10:00");
+          setRecur("once");
+        }
+      }, [open, defaultDate]);
+
+      const save = () => {
+        onSave({ title: title || "Sem título", cat, date, start, end, recur });
+        onClose();
+      };
+
+      return (
+        <div className={`modal-overlay ${open ? "is-open" : ""}`} onClick={onClose}>
+          <div className="modal" onClick={(e) => e.stopPropagation()} style={{ width: 460 }}>
+            <div className="modal__head">
+              <div className="modal__title">Novo bloco</div>
+              <button className="modal__close" onClick={onClose} aria-label="Fechar">
+                <Icon id="x" />
+              </button>
+            </div>
+            <div className="cal__form">
+              <div className="field">
+                <label className="field__lbl">Título</label>
+                <input
+                  className="field__input"
+                  placeholder="Ex: Deep work, Aula de Cálculo, Academia…"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  autoFocus
+                />
+              </div>
+              <div className="field">
+                <label className="field__lbl">Categoria</label>
+                <div className="cal__cat-row">
+                  {CAL_CATS.map(c => (
+                    <button
+                      key={c.key}
+                      className={`cal__cat cal__cat--${c.key} ${cat === c.key ? "is-on" : ""}`}
+                      onClick={() => setCat(c.key)}
+                    >{c.label}</button>
+                  ))}
+                </div>
+              </div>
+              <div className="field">
+                <label className="field__lbl">Data</label>
+                <input
+                  type="date"
+                  className="field__input"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                />
+              </div>
+              <div className="field-row">
+                <div className="field">
+                  <label className="field__lbl">Início</label>
+                  <input
+                    type="time"
+                    className="field__input"
+                    value={start}
+                    onChange={(e) => setStart(e.target.value)}
+                  />
+                </div>
+                <div className="field">
+                  <label className="field__lbl">Fim</label>
+                  <input
+                    type="time"
+                    className="field__input"
+                    value={end}
+                    onChange={(e) => setEnd(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="field">
+                <label className="field__lbl">Recorrência</label>
+                <select
+                  className="field__select"
+                  value={recur}
+                  onChange={(e) => setRecur(e.target.value)}
+                >
+                  <option value="once">Não repetir</option>
+                  <option value="daily">Todos os dias</option>
+                  <option value="weekdays">Dias úteis (Seg–Sex)</option>
+                  <option value="weekly">Toda semana neste dia</option>
+                  <option value="biweekly">A cada 2 semanas</option>
+                </select>
+              </div>
+            </div>
+            <div className="cal__foot">
+              <button className="cal__btn cal__btn--ghost" onClick={onClose}>Cancelar</button>
+              <button className="cal__btn cal__btn--primary" onClick={save}>Salvar</button>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    const CalendarScreen = () => {
+      const [blocks, setBlocks] = useState(WEEK_BLOCKS);
+      const [modalOpen, setModalOpen] = useState(false);
+
+      // Today is Friday May 8 — index 4 in week. Now = 12:40.
+      const todayIdx = WEEK_DAYS.findIndex(d => d.isToday);
+      const nowY = calY(NOW_HOUR, NOW_MIN);
+
+      const hours = [];
+      for (let h = CAL_START; h <= CAL_END; h++) hours.push(h);
+
+      const handleSave = (b) => {
+        // Map ISO date to weekday index and append to blocks.
+        const [y, mo, da] = b.date.split("-").map(Number);
+        const dt = new Date(y, mo - 1, da);
+        const jsDow = dt.getDay();              // 0=Sun..6=Sat
+        const dayIdx = (jsDow + 6) % 7;          // 0=Mon..6=Sun
+        const [sH, sM] = b.start.split(":").map(Number);
+        const [eH, eM] = b.end.split(":").map(Number);
+        setBlocks(bs => [...bs, { day: dayIdx, sH, sM, eH, eM, t: b.title, cat: b.cat }]);
+      };
+
+      return (
+        <div className="cal">
+          <header className="cal__head">
+            <div className="cal__head-left">
+              <div className="cal__nav">
+                <button aria-label="Semana anterior">‹</button>
+                <button aria-label="Próxima semana">›</button>
+              </div>
+              <div className="cal__range">4 – 10 de maio de 2026</div>
+              <button className="cal__today-btn">Hoje</button>
+            </div>
+            <button className="cal__cta" onClick={() => setModalOpen(true)}>
+              <Icon id="plus" /> Novo Bloco
+            </button>
+          </header>
+
+          <div className="cal__grid-wrap">
+            <div className="cal__head-row">
+              <div className="cal__corner" />
+              {WEEK_DAYS.map((d, i) => (
+                <div key={i} className={`cal__day-head ${d.isToday ? "is-today" : ""}`}>
+                  <span className="wd">{d.wd}</span>
+                  <span className="num">{d.num}</span>
+                </div>
+              ))}
+            </div>
+            <div className="cal__body">
+              <div className="cal__hours-col">
+                {hours.map((h) => (
+                  <div
+                    key={h}
+                    className="cal__hour"
+                    style={{ top: (h - CAL_START) * CAL_HOUR_H }}
+                  >{fmtHM(h, 0)}</div>
+                ))}
+              </div>
+              {WEEK_DAYS.map((d, i) => (
+                <div key={i} className={`cal__day-col ${d.isToday ? "is-today" : ""}`}>
+                  {hours.slice(1).map((h) => (
+                    <div
+                      key={h}
+                      className="cal__gridline"
+                      style={{ top: (h - CAL_START) * CAL_HOUR_H }}
+                    />
+                  ))}
+                  {blocks.filter(b => b.day === i).map((b, j) => (
+                    <CalBlock key={j} b={b} />
+                  ))}
+                  {d.isToday && (
+                    <div className="cal__now" style={{ top: nowY }}>
+                      <span className="cal__now-label">{fmtHM(NOW_HOUR, NOW_MIN)}</span>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <NewBlockModal
+            open={modalOpen}
+            onClose={() => setModalOpen(false)}
+            onSave={handleSave}
+            defaultDate="2026-05-08"
+          />
+        </div>
+      );
+    };
+
+    const Metric = ({ label, glyph, children }) => (
+      <div className="card metric">
+        <div className="metric__label">
+          <span>{label}</span>
+          {glyph && <Icon id={glyph} className="glyph" width="14" height="14" />}
+        </div>
+        {children}
+      </div>
+    );
+
+    const KCard = ({ card }) => (
+      <div className={`kcard ${card.active ? "is-active" : ""}`}>
+        <div className="kcard__title">{card.t}</div>
+        <div className="kcard__meta">
+          <span className={`ktag tag-${card.tag}`}>{card.tag}</span>
+        </div>
+        <div className="kcard__foot">
+          <span>{card.meta.date}</span>
+          {card.meta.attach && (
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 3 }}>
+              <Icon id="paperclip" /> {card.meta.attach}
+            </span>
+          )}
+          {card.meta.msg && (
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 3 }}>
+              <Icon id="message" /> {card.meta.msg}
+            </span>
+          )}
+        </div>
+      </div>
+    );
+
+    const Agenda = () => {
+      const hours = [];
+      for (let h = AGENDA_START; h <= AGENDA_END; h++) hours.push(h);
+      const nowY = toY(NOW_HOUR, NOW_MIN);
+      return (
+        <div className="agenda">
+          <div className="agenda__wrap">
+            <div className="agenda__hours">
+              {hours.map((h) => (
+                <div
+                  key={h}
+                  className="agenda__hour"
+                  style={{ top: (h - AGENDA_START) * HOUR_H }}
+                >
+                  {fmtHM(h, 0)}
+                </div>
+              ))}
+            </div>
+            <div className="agenda__track">
+              {hours.slice(1).map((h) => (
+                <div
+                  key={h}
+                  className="agenda__gridline"
+                  style={{ top: (h - AGENDA_START) * HOUR_H }}
+                />
+              ))}
+              {AGENDA.map((b, i) => {
+                const top = toY(b.sH, b.sM);
+                const bottom = toY(b.eH, b.eM);
+                return (
+                  <div
+                    key={i}
+                    className={`ablock ablock--${b.cat}`}
+                    style={{ top, height: bottom - top - 4 }}
+                  >
+                    <div className="ablock__title">{b.t}</div>
+                    <div className="ablock__time">
+                      {fmtHM(b.sH, b.sM)} – {fmtHM(b.eH, b.eM)}
+                    </div>
+                  </div>
+                );
+              })}
+              <div className="now-line" style={{ top: nowY }}>
+                <span className="now-line__label">{fmtHM(NOW_HOUR, NOW_MIN)}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    const Dashboard = ({ tweaks }) => {
+      const { entries, total } = aggregateTagTime();
+      const accent = tweaks.accent;
+      return (
+      <div className="dashboard">
+        <div className="metrics">
+          <Metric label="Tarefas hoje" glyph="check-square">
+            <div className="metric__value">
+              4<span className="small">/ 7</span>
+            </div>
+            <div className="progress" aria-label="57% concluído">
+              <div className="progress__fill" style={{ width: "57%" }} />
+            </div>
+            <div className="metric__sub">
+              <strong>57%</strong> concluído · 3 restantes
+            </div>
+          </Metric>
+
+          <Metric label="Foco acumulado" glyph="hourglass">
+            <div className="metric__value is-mono">2h 34min</div>
+            <div className="metric__sub">
+              em <strong>3 sessões</strong> · meta diária <strong>4h</strong>
+            </div>
+          </Metric>
+
+          <Metric label="Próximo bloco" glyph="bolt">
+            <div className="next-block-time">14:00 – 15:00</div>
+            <div className="next-block-title">Revisão de código</div>
+            <div className="metric__sub" style={{ marginTop: 6 }}>
+              <span className="countdown">em 1h 20min</span>
+            </div>
+          </Metric>
+        </div>
+
+        {tweaks.showChart && (
+          <div className="panel chart-panel">
+            <div className="panel__head">
+              <div className="panel__title">Distribuição do tempo por etiqueta</div>
+              <span className="panel__link" style={{cursor:"default", color:"var(--color-text-secondary)"}}>{KANBAN.reduce((s,c)=>s+c.cards.length,0)} tarefas · {fmtHours(total)}</span>
+            </div>
+            <Pie data={entries} total={total} donut={tweaks.chartType === "donut"} accent={accent} />
+            <Legend data={entries} accent={accent} showBars={tweaks.showBars} />
+          </div>
+        )}
+
+        <div className="split">
+          <div className="panel">
+            <div className="panel__head">
+              <div className="panel__title">Kanban</div>
+              <a href="#" className="panel__link">Abrir quadro →</a>
+            </div>
+            <div className="kanban">
+              {KANBAN.map((col) => (
+                <div className="kcol" key={col.name}>
+                  <div className="kcol__head">
+                    <div className="kcol__name">{col.name}</div>
+                    <div className="kcol__count">{col.count}</div>
+                  </div>
+                  {col.cards.map((c, i) => <KCard key={i} card={c} />)}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="panel">
+            <div className="panel__head">
+              <div className="panel__title">Agenda do dia</div>
+              <a href="#" className="panel__link">Calendário →</a>
+            </div>
+            <Agenda />
+          </div>
+        </div>
+      </div>
+    );
+    };
+
+    const Placeholder = ({ mod }) => (
+      <article className="placeholder" key={mod.key}>
+        <div className="placeholder__icon">
+          <Icon id={mod.icon} />
+        </div>
+        <div className="placeholder__eyebrow">{mod.eyebrow}</div>
+        <h1 className="placeholder__title">{mod.title}</h1>
+        <p className="placeholder__body">{mod.body}</p>
+        <div className="placeholder__meta">
+          {mod.meta.map((m) => (
+            <span key={m} className="meta-item">
+              <span className="dot-soft" />
+              {m}
+            </span>
+          ))}
+        </div>
+        <div className="placeholder__divider" />
+        <button className="placeholder__cta">
+          <Icon id="plus" />
+          Começar a configurar
+        </button>
+      </article>
+    );
+
+    const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+      "showChart": true,
+      "chartType": "donut",
+      "showBars": true,
+      "accent": "#CC5200"
+    }/*EDITMODE-END*/;
+
+    function App() {
+      const [active, setActive] = useState("calendar");
+      const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+      const mod = useMemo(() => MODULES.find(m => m.key === active), [active]);
+      React.useEffect(() => {
+        document.documentElement.style.setProperty("--color-accent", t.accent);
+      }, [t.accent]);
+      return (
+        <div className="app">
+          <Sidebar active={active} onSelect={setActive} />
+          <main className="main">
+            <TopBar title={mod.label} />
+            <section className="content">
+              {active === "dashboard"
+                ? <Dashboard tweaks={t} />
+                : active === "kanban"
+                ? <KanbanScreen />
+                : active === "focus"
+                ? <FocusScreen goToKanban={() => setActive("kanban")} />
+                : active === "calendar"
+                ? <CalendarScreen />
+                : <Placeholder mod={mod} />}
+            </section>
+          </main>
+          <TweaksPanel title="Tweaks">
+            <TweakSection label="Gráfico de tempo" />
+            <TweakToggle label="Mostrar gráfico" value={t.showChart}
+                         onChange={(v) => setTweak('showChart', v)} />
+            <TweakRadio label="Estilo" value={t.chartType}
+                        options={['donut','pizza']}
+                        onChange={(v) => setTweak('chartType', v)} />
+            <TweakToggle label="Barras na legenda" value={t.showBars}
+                         onChange={(v) => setTweak('showBars', v)} />
+            <TweakSection label="Tema" />
+            <TweakColor label="Cor de destaque" value={t.accent}
+                        options={['#CC5200','#7A5AE0','#1F8A5B','#2A6FDB','#B0894A']}
+                        onChange={(v) => setTweak('accent', v)} />
+          </TweaksPanel>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

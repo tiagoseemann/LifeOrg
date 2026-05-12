@@ -148,33 +148,6 @@ export function FocusScreen({ onGoToCard }: FocusScreenProps) {
               <Icon id="play" size={14} />
               Selecionar Tarefa
             </button>
-            <div className={styles.durSection}>
-              <span className={styles.durLabel}>Duração da sessão</span>
-              <div className={styles.durRow}>
-                {DUR_OPTIONS.map(opt => (
-                  <button
-                    key={opt.key}
-                    className={`${styles.durChip} ${durKey === opt.key ? styles.active : ''}`}
-                    onClick={() => setDurKey(opt.key)}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-                <input
-                  type="number"
-                  className={`${styles.customInput} ${durKey === 'custom' ? styles.active : ''}`}
-                  value={customMin}
-                  min={1} max={999}
-                  placeholder="min"
-                  onChange={e => {
-                    const v = parseInt(e.target.value, 10)
-                    if (!isNaN(v) && v > 0) { setCustomMin(v); setDurKey('custom') }
-                  }}
-                  onFocus={() => setDurKey('custom')}
-                  aria-label="Duração personalizada em minutos"
-                />
-              </div>
-            </div>
           </>
         ) : (
           <>
@@ -220,6 +193,38 @@ export function FocusScreen({ onGoToCard }: FocusScreenProps) {
           </>
         )}
       </div>
+
+      {!isActive && (
+        <div className={styles.durWrap}>
+          <div className={styles.durSection}>
+            <span className={styles.durLabel}>Duração da sessão</span>
+            <div className={styles.durRow}>
+              {DUR_OPTIONS.map(opt => (
+                <button
+                  key={opt.key}
+                  className={`${styles.durChip} ${durKey === opt.key ? styles.active : ''}`}
+                  onClick={() => setDurKey(opt.key)}
+                >
+                  {opt.label}
+                </button>
+              ))}
+              <input
+                type="number"
+                className={`${styles.customInput} ${durKey === 'custom' ? styles.active : ''}`}
+                value={customMin}
+                min={1} max={999}
+                placeholder="min"
+                onChange={e => {
+                  const v = parseInt(e.target.value, 10)
+                  if (!isNaN(v) && v > 0) { setCustomMin(v); setDurKey('custom') }
+                }}
+                onFocus={() => setDurKey('custom')}
+                aria-label="Duração personalizada em minutos"
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className={styles.history}>
         <span className={styles.historyLabel}>Histórico hoje</span>

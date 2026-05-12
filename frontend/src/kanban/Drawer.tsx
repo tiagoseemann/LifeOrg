@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Icon } from '../shell/Icon'
 import { fmtDuration } from '../lib/format'
 import type { CardUpdatePayload } from '../hooks/useCards'
+import { useBlocks } from '../hooks/useBlocks'
 import type { Card, Category, Column } from '../types/kanban'
 import styles from './Drawer.module.css'
 
@@ -12,6 +13,7 @@ interface DrawerProps {
   onClose: () => void
   onChange: (updates: Omit<CardUpdatePayload, 'id'>) => void
   onStartFocus: (card: Card) => void
+  onDelete: (cardId: string) => void
 }
 
 function useDebounce<T>(value: T, delay: number): T {
@@ -23,12 +25,20 @@ function useDebounce<T>(value: T, delay: number): T {
   return debounced
 }
 
-export function Drawer({ card, columns, categories, onClose, onChange, onStartFocus }: DrawerProps) {
+export function Drawer({ card, columns, categories, onClose, onChange, onStartFocus, onDelete }: DrawerProps) {
   const titleRef = useRef<HTMLInputElement>(null)
 
   // Local state for text fields that need debounce
   const [localTitle, setLocalTitle] = useState(card.title)
   const [localDesc, setLocalDesc] = useState(card.description ?? '')
+  const [confirmDelete, setConfirmDelete] = useState(false)
+
+  const { data: allBlocks } = useBlocks()
+  const linkedBlock = allBlocks?.find(b => b.card_id === card.id) ?? null
+
+  useEffect(() => {
+    setConfirmDelete(false)
+  }, [card.id])
 
   const debouncedTitle = useDebounce(localTitle, 450)
   const debouncedDesc  = useDebounce(localDesc,  450)
@@ -166,10 +176,45 @@ export function Drawer({ card, columns, categories, onClose, onChange, onStartFo
         </div>
 
         <div className={styles.foot}>
-          <button className={styles.ctaBtn} onClick={() => onStartFocus(card)}>
-            <Icon id="play" size={14} />
-            Iniciar Foco
-          </button>
+          {confirmDelete ? (
+            <div className={styles.deleteConfirm}>
+              <p className={linkedBlock ? styles.deleteWarningLinked : styles.deleteWarning}>
+                {linkedBlock
+                  ? 'Este card está vinculado a um bloco no calendário. Ao excluir o card, o bloco será mantido, mas perderá a associação. Continuar?'
+                  : 'Excluir este card permanentemente?'}
+              </p>
+              <div className={styles.deleteActions}>
+                <button
+                  className={styles.cancelBtn}
+                  onClick={() => setConfirmDelete(false)}
+                >
+                  Cancelar
+                </button>
+                <button
+                  className={styles.dangerBtn}
+                  onClick={() => {
+                    onDelete(card.id)
+                    onClose()
+                  }}
+                >
+                  Excluir
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <button className={styles.ctaBtn} onClick={() => onStartFocus(card)}>
+                <Icon id="play" size={14} />
+                Iniciar Foco
+              </button>
+              <button
+                className={styles.deleteLink}
+                onClick={() => setConfirmDelete(true)}
+              >
+                Excluir card
+              </button>
+            </>
+          )}
         </div>
       </div>
     </>

@@ -128,6 +128,10 @@ export function KanbanScreen({ onStartFocus }: KanbanScreenProps) {
     if (cardInCol) selectCard(null)
   }
 
+  function handleDeleteCard(cardId: string) {
+    deleteCard.mutate(cardId)
+  }
+
   return (
     <div className={styles.screen}>
       <div className={styles.header}>
@@ -222,6 +226,7 @@ export function KanbanScreen({ onStartFocus }: KanbanScreenProps) {
           onClose={() => selectCard(null)}
           onChange={handleCardChange}
           onStartFocus={onStartFocus}
+          onDelete={handleDeleteCard}
         />
       )}
 

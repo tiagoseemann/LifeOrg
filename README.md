@@ -41,7 +41,7 @@ cd LifeOrg
 ./scripts/dev.sh
 ```
 
-Acesse **http://localhost:3000** no navegador.
+Acesse **http://localhost:3000** no navegador, ou a porta configurada em `FRONTEND_PORT`.
 
 O script cria `.env` a partir de `.env.example` quando o arquivo não existe ou está vazio.
 Na primeira inicialização, as migrações do banco são aplicadas automaticamente. Três categorias padrão (Pessoal, Trabalho, Estudo) e três colunas Kanban (A fazer, Em progresso, Concluído) são criadas automaticamente.
@@ -55,15 +55,24 @@ Comandos úteis:
 ./scripts/dev.sh down     # para e remove os containers
 ```
 
+Se a porta `3000` já estiver em uso, suba o frontend em outra porta:
+
+```bash
+FRONTEND_PORT=3001 ./scripts/dev.sh
+```
+
+Para deixar isso fixo, defina `FRONTEND_PORT=3001` no `.env`.
+
 ---
 
 ## Variáveis de ambiente
 
-Copie `.env.example` para `.env` e preencha:
+O `./scripts/dev.sh` cria `.env` a partir de `.env.example` automaticamente quando necessário. Para configurar manualmente, copie `.env.example` para `.env` e preencha:
 
 | Variável | Descrição | Padrão |
 |---|---|---|
 | `API_SECRET_KEY` | Chave usada pelo proxy Vite para autenticar requests ao backend | — |
+| `FRONTEND_PORT` | Porta do host usada para acessar o frontend | `3000` |
 | `POSTGRES_USER` | Usuário do PostgreSQL | `lifeorg` |
 | `POSTGRES_PASSWORD` | Senha do PostgreSQL | `lifeorg` |
 | `POSTGRES_DB` | Nome do banco | `lifeorgdb` |
