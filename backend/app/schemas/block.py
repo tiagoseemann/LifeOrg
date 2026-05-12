@@ -59,5 +59,8 @@ class BlockOut(BaseModel):
     category_id: Optional[str]
     card_id: Optional[str]
     recurrence: Optional[str]
+    google_event_id: Optional[str] = None
+    is_google_event: bool = False
+    sync_status: str = "local"
 
     model_config = {"from_attributes": True}

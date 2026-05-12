@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Icon } from '../shell/Icon'
 import { CalBlock } from './CalBlock'
+import { GoogleConnectBanner } from './GoogleConnectBanner'
 import { NewBlockModal } from './NewBlockModal'
 import { useBlocks, useCreateBlock, useDeleteBlock, useUpdateBlock } from '../hooks/useBlocks'
 import { useCategories } from '../hooks/useCategories'
@@ -108,6 +109,8 @@ export function CalendarScreen() {
           Novo Bloco
         </button>
       </div>
+
+      <GoogleConnectBanner weekStart={weekParam} />
 
       <div className={styles.grid}>
         <div className={styles.gridHeader}>

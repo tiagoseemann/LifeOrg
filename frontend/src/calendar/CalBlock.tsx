@@ -24,15 +24,23 @@ export function CalBlock({ block, category, dayStartHour, onClick }: CalBlockPro
 
   const slug = category?.slug ?? 'default'
   const catClass = (styles as Record<string, string>)[slug] ?? styles.default
+  const googleClass = block.is_google_event ? styles.googleBlock : ''
+  const errorClass = block.sync_status === 'error' ? styles.syncError : ''
 
-  const tooltipText = [block.title, category?.name ?? '', `${fmtTime(start)} – ${fmtTime(end)}`]
-    .filter(Boolean).join('\n')
+  const tooltipParts = [
+    block.title,
+    category?.name ?? '',
+    `${fmtTime(start)} – ${fmtTime(end)}`,
+  ]
+  if (block.is_google_event) tooltipParts.push('Sincronizado do Google')
+  if (block.sync_status === 'error') tooltipParts.push('⚠ Falha ao sincronizar com o Google')
+  const tooltipText = tooltipParts.filter(Boolean).join('\n')
 
   const showTime = height >= 28
 
   return (
     <div
-      className={`${styles.block} ${catClass}`}
+      className={`${styles.block} ${catClass} ${googleClass} ${errorClass}`}
       style={{ top: `${top}px`, height: `${height}px` }}
       onClick={onClick}
       role="button"
@@ -41,6 +49,8 @@ export function CalBlock({ block, category, dayStartHour, onClick }: CalBlockPro
       title={tooltipText}
       aria-label={`${block.title}, ${fmtTime(start)} – ${fmtTime(end)}`}
     >
+      {block.is_google_event && <span className={styles.googleBadge}>G</span>}
+      {block.sync_status === 'error' && <span className={styles.syncErrorBadge}>!</span>}
       <div className={styles.title}>{block.title}</div>
       {showTime && <div className={styles.time}>{fmtTime(start)} – {fmtTime(end)}</div>}
     </div>

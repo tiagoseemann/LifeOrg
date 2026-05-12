@@ -62,3 +62,44 @@
 .block.estudo   .time { color: var(--cat-estudo-time); }
 .block.pessoal  .time { color: var(--color-text-secondary); }
 .block.default  .time { color: var(--color-text-secondary); }
+
+/* Cores de marca do Google — propositais para identificar origem remota.
+   Não substituem o accent coral da app. */
+.googleBlock {
+  background: #E8F0FE;
+  border-left: 2px solid #4285F4;
+}
+
+.googleBlock .title {
+  color: #1a3a6b;
+}
+
+.googleBlock .time {
+  color: #4285F4;
+}
+
+.googleBadge {
+  position: absolute;
+  top: 3px;
+  right: 5px;
+  font-size: 9px;
+  font-weight: 700;
+  color: #4285F4;
+  letter-spacing: 0.04em;
+  opacity: 0.8;
+  font-family: var(--font-mono);
+}
+
+.syncError {
+  outline: 1px solid var(--color-accent);
+}
+
+.syncErrorBadge {
+  position: absolute;
+  top: 3px;
+  left: 5px;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--color-accent);
+  font-family: var(--font-mono);
+}

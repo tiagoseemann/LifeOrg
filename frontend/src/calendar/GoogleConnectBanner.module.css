@@ -1,0 +1,88 @@
+.banner,
+.bannerConnected {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: var(--color-bg-surface);
+  border: 0.5px solid var(--color-border);
+  border-radius: 10px;
+  margin-bottom: 12px;
+  gap: 12px;
+}
+
+.bannerText {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.connectedInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Cor de marca do Google (verde do "conectado") — proposital, não é o accent. */
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #34a853;
+  flex-shrink: 0;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.connectBtn {
+  background: var(--color-accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 7px 14px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background-color 0.12s ease;
+  white-space: nowrap;
+}
+
+.connectBtn:hover {
+  background: var(--color-accent-hover);
+}
+
+.syncBtn {
+  background: none;
+  border: 0.5px solid var(--color-border);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  transition: background-color 0.12s ease;
+}
+
+.syncBtn:hover {
+  background: var(--color-bg-base);
+}
+
+.syncBtn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.disconnectBtn {
+  background: none;
+  border: none;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: 4px;
+  transition: color 0.12s ease;
+}
+
+.disconnectBtn:hover {
+  color: var(--color-accent);
+}
